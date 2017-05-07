@@ -45,7 +45,6 @@ if __name__ == "__main__":
     PORT = 5000
      
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # this has no effect, why ?
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind(("0.0.0.0", PORT))
     server_socket.listen(10)
@@ -66,6 +65,10 @@ if __name__ == "__main__":
             if sock == server_socket:
                 # Handle the case in which there is a new connection recieved through server_socket
                 sockfd, addr = server_socket.accept()
+
+                if(len(CONNECTION_LIST)>4):
+                    sockfd.send("Parques lleno, intentalo mas tarde")
+                    break
 
                 username = verifyUser(sockfd, users_list, CONNECTION_LIST, sock)
 
