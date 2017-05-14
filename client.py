@@ -27,13 +27,20 @@ if __name__ == "__main__":
     while True:
         data = s.recv(4096)
         print data
+        if (data=="Parques lleno, intentalo mas tarde"):
+            s.close()
+            Correcto = False
+            break
         if (data == "Bienvenido al chat"):
+            Correcto = True
             break
         username = raw_input("")
         s.send(username)
-    prompt(username)
+
+    if Correcto:
+        prompt(username)
      
-    while True:
+    while Correcto:
         socket_list = [sys.stdin, s]
          
         # Get the list sockets which are readable
