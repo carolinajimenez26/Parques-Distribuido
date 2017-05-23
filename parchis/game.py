@@ -22,8 +22,10 @@ if __name__ == '__main__':
 	# muestra el menu
 	jugar = menu(cursor)
 	##############################################
+	
 	if jugar:
-	#----------------SCREEN--------------------------
+		
+		#----------------SCREEN--------------------------
 
 		SCREEN = pygame.display.set_mode([WIDTH,HIGH])
 		bg = pygame.image.load('objetos/Background.png')
@@ -50,8 +52,10 @@ if __name__ == '__main__':
 
 		#---------------Sprites--------------------------
 
-		ls_all = pygame.sprite.Group()
-		ls_impactos = pygame.sprite.Group()
+		#ls_all = pygame.sprite.Group()
+		#ls_impactos = pygame.sprite.Group()
+		dado1 = Dado((WIDTH-400)/2 - 5, HIGH/2 - 25)
+		dado2 = Dado((WIDTH-280)/2 - 5, HIGH/2 - 25)
 
 		#----------------JUGADOR-------------------------
 
@@ -59,6 +63,7 @@ if __name__ == '__main__':
 	    #------------------------------------------------
 
 		end = False
+		tirar_dado = False
 
 		while not end:
 
@@ -67,7 +72,11 @@ if __name__ == '__main__':
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					end = True
-
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					if cursor.colliderect(boton_dados.rect):
+						tirar_dado = True
+					if cursor.colliderect(boton_salir.rect):
+						end = True
 
 
 	        #------------IMPRIME EN PANTALLA--------------
@@ -78,8 +87,15 @@ if __name__ == '__main__':
 			boton_salir.accion(SCREEN, cursor)
 			boton_dados.accion(SCREEN, cursor)
 			SCREEN.blit(pygame.transform.scale(bg, (WIDTH-300, HIGH)), (0, 0))
+			if tirar_dado:
+				dado1.generate(SCREEN)
+				dado2.generate(SCREEN)
+				tirar_dado = False
+			dado1.draw(SCREEN)
+			dado2.draw(SCREEN)
 			pygame.display.flip()
 			reloj.tick(60)
-		else:
-			pass
-			#Pantalla fin
+		pygame.quit()
+	else:
+		pass
+		#Pantalla fin
