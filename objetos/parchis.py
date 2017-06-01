@@ -7,8 +7,9 @@ from menu import menu
 
 ANCHO=600
 ALTO=600
+ANCHO_PANTALLA=800
 pygame.init()
-PANTALLA = pygame.display.set_mode([ANCHO,ALTO])
+PANTALLA = pygame.display.set_mode([ANCHO_PANTALLA,ALTO])
 
 ##################################################################################
 class Cursor(pygame.Rect):
@@ -726,7 +727,10 @@ def main():
 	cursor= Cursor()
 
 	cerrar = menu(cursor)
+	#cerrar = False
 
+	
+	
 	cantidad=4 #cantidad de fichas
 	table=tablero() #tablero
 	table.pulir()
