@@ -742,9 +742,11 @@ def main():
 
     cerrar = menu(cursor, PANTALLA)
 
+    error_usuario = ""
+
     while not cerrar:
         print ("oda")
-        data_user = main_inputBox(cursor, PANTALLA)
+        data_user = main_inputBox(cursor, PANTALLA, error_usuario)
         s.send(data_user[0])
         data = s.recv(4096)
         print (data)
@@ -753,6 +755,9 @@ def main():
             sys.exit()
         if (data == "Bienvenido"):
             cerrar = True
+        if (data == "Nombre de usuario ya ha sido utilizado\n"):
+        	print ("entro")
+        	error_usuario = "Nombre de usuario ya ha sido utilizado"
 
     print data_user
     return

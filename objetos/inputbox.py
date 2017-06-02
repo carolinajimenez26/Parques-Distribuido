@@ -81,13 +81,14 @@ def display_box(screen, message, cursor, x, y):
   pygame.display.flip()
 
 
-def ask(screen, question, cursor):
+def ask(screen, question, cursor, usr_err):
   "ask(screen, question) -> answer"
   current_color = None
   mesagge_color = ""
   pygame.font.init()
   current_string = []
   display_box(screen, question + ": " + string.join(current_string,""), cursor, 100, 20)
+  display_box(screen, usr_err, cursor, 120, 200)
   while 1:
     inkey, current_color = get_key(cursor, screen, current_color)
     if inkey == K_BACKSPACE:
@@ -107,14 +108,16 @@ def ask(screen, question, cursor):
     print "Color seleccionado: %s" %current_color
 
     display_box(screen, question + ": " + string.join(current_string,""), cursor, 100, 20)
-    display_box(screen, mesagge_color, cursor, 150, 180)
+    display_box(screen, mesagge_color, cursor, 150, 170)
+    display_box(screen, usr_err, cursor, 120, 200)
+    
 
   #screen = pygame.display.set_mode([800, 600])
   return (string.join(current_string,""),current_color)
 
-def main_inputBox(cursor, screen):
+def main_inputBox(cursor, screen, usr_err):
   screen = pygame.display.set_mode((500,240))
-  return ask(screen, "Nombre de usuario", cursor)
+  return ask(screen, "Nombre de usuario", cursor, usr_err)
 
 
 #if __name__ == '__main__': main_inputBox()
