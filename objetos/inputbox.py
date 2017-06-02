@@ -14,7 +14,7 @@
 
 import pygame, pygame.font, pygame.event, pygame.draw, string
 from pygame.locals import *
-from objects import Boton
+from objects import *
 
 
 rojo1 = pygame.image.load("rojo.png")
@@ -42,14 +42,6 @@ boton_amarillo = Boton(amarillo1,amarillo2,280,100)
 color = "" 
 current_color = None
 
-class Cursor(pygame.Rect):
-    def __init__(self):
-        pygame.Rect.__init__(self,0,0,1,1)
-    def posicion(self):
-        self.left,self.top=pygame.mouse.get_pos()
-
-cursor = Cursor()
-
 def get_key(cursor, screen, current_color):
   color=current_color
   while 1:
@@ -75,10 +67,10 @@ def get_key(cursor, screen, current_color):
     boton_amarillo.accion(screen,cursor)
     pygame.display.flip()
 
-def display_box(screen, message, cursor):
+def display_box(screen, message, cursor, x, y):
   "Print a message in a box in the middle of the screen"
-  x = 100 #(screen.get_width() / 2) - 102
-  y = 20 #(screen.get_height() / 2) - 12
+  #x = 100 #(screen.get_width() / 2) - 102
+  #y = 20 #(screen.get_height() / 2) - 12
   fontobject = pygame.font.Font(None,25)
   pygame.draw.rect(screen, (0,0,0),(x,y,500,240), 0)
   #pygame.draw.rect(screen, (255,255,255),(x-5,y-5,204,24), 1)
@@ -92,16 +84,21 @@ def display_box(screen, message, cursor):
 def ask(screen, question, cursor):
   "ask(screen, question) -> answer"
   current_color = None
+  mesagge_color = ""
   pygame.font.init()
   current_string = []
-  display_box(screen, question + ": " + string.join(current_string,""), cursor)
+  display_box(screen, question + ": " + string.join(current_string,""), cursor, 100, 20)
   while 1:
     inkey, current_color = get_key(cursor, screen, current_color)
     if inkey == K_BACKSPACE:
       current_string = current_string[0:-1]
       #print ("curr : ", current_string)
     elif inkey == K_RETURN:
-      break
+      if current_color is None:
+        mesagge_color = "Seleccione color"
+        print ("Seleccione color")
+      else:
+        break
     elif inkey == K_MINUS:
       current_string.append("-")
     elif inkey <= 127:
@@ -109,12 +106,18 @@ def ask(screen, question, cursor):
         current_string.append(chr(inkey))
     print "Color seleccionado: %s" %current_color
 
-    display_box(screen, question + ": " + string.join(current_string,""), cursor)
-    
-  return string.join(current_string,"")
+    display_box(screen, question + ": " + string.join(current_string,""), cursor, 100, 20)
+    display_box(screen, mesagge_color, cursor, 150, 180)
 
-def main():
+  dic = {}
+  dic[string.join(current_string,"")] = current_color
+
+  screen = pygame.display.set_mode([800, 600])  
+  return dic
+
+def main_inputBox(cursor, screen):
   screen = pygame.display.set_mode((500,240))
   return ask(screen, "Nombre de usuario", cursor)
 
-if __name__ == '__main__': main()
+
+#if __name__ == '__main__': main_inputBox()

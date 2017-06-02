@@ -3,11 +3,9 @@ import sys
 from pygame.locals import *
 from objects import Boton
 
-def menu(cursor):
+def menu(cursor, PANTALLA):
     ALTO = 600
     ANCHO = 600
-
-    pygame.init()
 
     PANTALLA = pygame.display.set_mode([ANCHO,ALTO])
     pygame.key.set_repeat(100,10)
@@ -43,5 +41,4 @@ def menu(cursor):
         boton2.accion(PANTALLA,cursor)
         pygame.display.flip()
     pygame.mixer.music.stop()
-    pygame.quit()
     return val

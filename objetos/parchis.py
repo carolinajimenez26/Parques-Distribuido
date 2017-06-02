@@ -4,6 +4,8 @@ import time
 import random
 from pygame.locals import *
 from menu import menu
+from inputbox import main_inputBox, display_box
+from objects import *
 
 ANCHO=600
 ALTO=600
@@ -12,11 +14,7 @@ pygame.init()
 PANTALLA = pygame.display.set_mode([ANCHO_PANTALLA,ALTO])
 
 ##################################################################################
-class Cursor(pygame.Rect):
-    def __init__(self):
-        pygame.Rect.__init__(self,0,0,1,1)
-    def posicion(self):
-        self.left,self.top=pygame.mouse.get_pos()
+
 
 class Imagen(pygame.sprite.Sprite):
     def __init__(self,imagen,x,y,ancho,alto):
@@ -726,10 +724,12 @@ def main():
 
 	cursor= Cursor()
 
-	cerrar = menu(cursor)
+	cerrar = menu(cursor, PANTALLA)
 	#cerrar = False
 
-	
+	#user is a dictionary with key username and value color
+	user = main_inputBox(cursor, PANTALLA)
+	print user
 	
 	cantidad=4 #cantidad de fichas
 	table=tablero() #tablero
@@ -762,6 +762,13 @@ def main():
 	dado_1=Dados(dado_1,(600/3)+(int(600/3)*0.25),int(((600)/3)+((600/3)*0.4)),int((600/3)*0.2),int((600/3)*0.2))
 	dado_2=pygame.image.load("2.JPG")
 	dado_2=Dados(dado_2,(600/3)+(int(600/3)*0.5),int((600)/3)+((600/3)*0.4),int((600/3)*0.2),int((600/3)*0.2))
+
+	empezar1 = pygame.image.load("botones/empezar1.jpg")
+	empezar1 = pygame.transform.scale(empezar1, (100,50))
+	empezar2 = pygame.image.load("botones/empezar2.jpg")
+	empezar2 = pygame.transform.scale(empezar2, (100,50))
+
+	boton_empezar = Boton(empezar1, empezar2, 650, 500)
 	
 	playdados=True
 	carce=False
@@ -817,10 +824,13 @@ def main():
 			if(validaganador(lista_jugadores)):
 				pass
 
+
+
 		marco_1.dibujar(PANTALLA)
 		dado_1.dibujar(PANTALLA)
 		dado_2.dibujar(PANTALLA)
 		marco_2.dibujar(PANTALLA)
+		boton_empezar.accion(PANTALLA, cursor)
 		pygame.display.update()
 main()
 

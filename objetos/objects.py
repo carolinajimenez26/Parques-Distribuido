@@ -16,3 +16,9 @@ class Boton(pygame.sprite.Sprite):
         else:
             self.imagen_actual = self.imagen_normal
         pantalla.blit(self.imagen_actual,self.rect)
+
+class Cursor(pygame.Rect):
+    def __init__(self):
+        pygame.Rect.__init__(self,0,0,1,1)
+    def posicion(self):
+        self.left,self.top=pygame.mouse.get_pos()
