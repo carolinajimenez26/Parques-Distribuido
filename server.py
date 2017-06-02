@@ -22,7 +22,7 @@ def getUsername(sock, dic):
 
 def verifyUser(new_client, dic, CONNECTION_LIST, sock):
     while True:
-        new_client.send("Ingresa un nombre de usuario: ")
+        #new_client.send("Ingresa un nombre de usuario: ")
         user = new_client.recv(1024)
         print "User: %s" %user
 

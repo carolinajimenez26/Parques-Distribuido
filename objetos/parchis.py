@@ -460,7 +460,7 @@ class tablero(object):
 		self.Tiles[56].color="green"
 		self.Tiles[63].seguro=True		
 #______________________________________________________________________		
-class  Jugador(object):
+class Jugador(object):
 
 	def __init__(self,nombre,color):
 		self.lista_fichas=[]
@@ -498,7 +498,7 @@ class  Jugador(object):
 	def salircarcel(self):
 		pass
 #______________________________________________________________________
-class  ficha(object):	
+class ficha(object):	
 	def __init__(self,color):
 		self.pos="carcel"
 		self.seleccionada=False
