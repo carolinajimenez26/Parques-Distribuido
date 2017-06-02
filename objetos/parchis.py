@@ -6,6 +6,7 @@ from pygame.locals import *
 from menu import menu
 from inputbox import main_inputBox, display_box
 from objects import *
+import socket, select, string, sys
 
 ANCHO=600
 ALTO=600
@@ -53,7 +54,7 @@ class Dados(pygame.sprite.Sprite):
 ##################################################################################
 
 class Tile(object):
-	
+
 	def __init__(self):
 		self.ocupantes=[] #Numero de personas que estan ocupando el tile
 		self.seguro=False
@@ -76,8 +77,8 @@ class Tile(object):
 			contador=0
 			for x in self.ocupantes:
 				if(x.color==colordominante):
-					return (self.ocupantes.pop(contador)) 
-				contador+=1	
+					return (self.ocupantes.pop(contador))
+				contador+=1
 
 	def validarocupantes(self):
 		pass
@@ -93,7 +94,7 @@ def click(mx,my):
 		return  "green"
 
 	if(mx==2 and my==0):
-		return  "red"		
+		return  "red"
 
 	if(mx==0 and my==2):
 		return  "yellow"
@@ -102,10 +103,10 @@ def click(mx,my):
 	if(mx==2 and my==2):
 		return  "blue"
     #Cordenadas de secciones
-	
+
 	if(mx==1 and my==0):
 		# print("seccion verde y roja")
-	
+
 		mx1=int(mx1/66)
 		auxx=mx1-3
 		mx1=55-mx1
@@ -114,12 +115,12 @@ def click(mx,my):
 		if(auxx==2):
 			return(mx1-my1)
 		if(auxx==0):
-			return(mx1+my1)		
+			return(mx1+my1)
 		if(auxx==1):
 			if(mx1==51 and my1==0):
 				return 51
 			else:
-				return(mx1+my1+35)	
+				return(mx1+my1+35)
 
 	if(mx==0 and my==1):
 		# print("seccion amarilla y verde")
@@ -127,7 +128,7 @@ def click(mx,my):
 		mx1=int(mx1/28)
 		my1=int(my1/66)
 		auxy=my1-3
-	
+
 		if(auxy==0):
 			my1=my1+64
 			return(my1-mx1)
@@ -138,11 +139,11 @@ def click(mx,my):
 			if(my1+mx1>74):
 				return 74
 			else:
-				return(my1+mx1)		
-	
+				return(my1+mx1)
+
 		if(auxy==2):
 			my1=my1
-			return(mx1+1)	
+			return(mx1+1)
 
 
 	if(mx==1 and my==2):
@@ -153,7 +154,7 @@ def click(mx,my):
 		my1=int(my1/27.5)
 
 		if(auxx==0):
-			return(mx1+my1-2)	
+			return(mx1+my1-2)
 
 		if(auxx==2):
 			return(mx1-my1+44)
@@ -169,11 +170,11 @@ def click(mx,my):
 
 
 	if(mx==2 and my==1):
-		# print("seccion azul y rojo")	
+		# print("seccion azul y rojo")
 		mx1=int(mx1/29)
 		my1=int(my1/66)
 		auxy=my1-3
-	
+
 		if(auxy==0):
 			my1=my1+52
 			if(my1-mx1==34):
@@ -182,20 +183,20 @@ def click(mx,my):
 
 		if(auxy==1):
 			my1=my1+96
-			
+
 			if((mx1==20 or mx1==21) and my1==100):
 				return 34
 			else:
-				return(my1-mx1)	
+				return(my1-mx1)
 
 		if(auxy==2):
 			my1=my1+8
 			if(my1+mx1==34):
 				return 33
-			return(my1+mx1)	
+			return(my1+mx1)
 
 	if(mx==1 and my==1):
-		# print("cuadro medio")	
+		# print("cuadro medio")
 		mx1=int(mx1/66)
 		my1=int(my1/28)
 		# print(mx1,my1)
@@ -204,7 +205,7 @@ def click(mx,my):
 
 		if(mx1==5 and my1==7):
 			return 43
-		
+
 		if((mx1==3 and my1==8) or  (mx1==3 and my1==9)):
 			return 60
 
@@ -216,7 +217,7 @@ def click(mx,my):
 
 		if(mx1==5 and my1==12):
 			return 26
-		
+
 
 		if((mx1==3 and my1==14) or  (mx1==3 and my1==13)):
 			return 9
@@ -301,7 +302,7 @@ def vector_posiciones(dato):
 	#	contador+=1
 
 	return(vector_posiciones[dato-1])
-	
+
 def cargartiles(cantidad,lista):
 	contador=1
 	for x in range(1,cantidad):
@@ -311,7 +312,7 @@ def cargartiles(cantidad,lista):
 			til.cuadrante=4
 
 		if(contador>=60 and contador<=68):
-			til.cuadrante=4		
+			til.cuadrante=4
 
 		if(contador>=43 and contador<=59):
 			til.cuadrante=1
@@ -323,7 +324,7 @@ def cargartiles(cantidad,lista):
 		if(contador>=9 and contador<=25):
 			til.cuadrante=3
 
-		contador+=1	
+		contador+=1
 		lista.append(til)
 
 class tablero(object):
@@ -363,7 +364,7 @@ class tablero(object):
 				if(y.pos=="carcel"):
 					if(x.color=="green"):
 						PANTALLA.blit(verde,(60*contador,60*contadory))
-						
+
 					if(x.color=="red"):
 						PANTALLA.blit(rojo,(400+contador*60,60*contadory))
 
@@ -383,9 +384,9 @@ class tablero(object):
 
 					cuadrex=0
 					cuadrey=0
-					#ACOMODAR POR CUADRANTES 
+					#ACOMODAR POR CUADRANTES
 					if(self.Tiles[y.pos].cuadrante==1):
-						cuadrex=self.Tiles[y.pos].acomodo=self.Tiles[y.pos].acomodo+20			
+						cuadrex=self.Tiles[y.pos].acomodo=self.Tiles[y.pos].acomodo+20
 						cuadrey=10
 
 					if(self.Tiles[y.pos].cuadrante==2):
@@ -395,7 +396,7 @@ class tablero(object):
 
 					if(self.Tiles[y.pos].cuadrante==3):
 
-						cuadrex=self.Tiles[y.pos].acomodo=self.Tiles[y.pos].acomodo+20			
+						cuadrex=self.Tiles[y.pos].acomodo=self.Tiles[y.pos].acomodo+20
 						cuadrey=-20
 
 					if(self.Tiles[y.pos].cuadrante==4):
@@ -403,34 +404,34 @@ class tablero(object):
 						cuadrey=self.Tiles[y.pos].acomodoy=self.Tiles[y.pos].acomodoy+20
 
 					if(y.pos==59):
-						cuadrex=self.Tiles[y.pos].acomodo=self.Tiles[y.pos].acomodo+20			
+						cuadrex=self.Tiles[y.pos].acomodo=self.Tiles[y.pos].acomodo+20
 						cuadrey=0
 
 					if(y.pos==25):
-						cuadrex=self.Tiles[y.pos].acomodo=self.Tiles[y.pos].acomodo+20			
-						cuadrey=-20					
+						cuadrex=self.Tiles[y.pos].acomodo=self.Tiles[y.pos].acomodo+20
+						cuadrey=-20
 
 					if(y.pos==8):
-						cuadrex=0			
+						cuadrex=0
 						cuadrey=self.Tiles[y.pos].acomodoy=self.Tiles[y.pos].acomodoy+20
 
 					if(y.pos==42):
-						cuadrex=-20			
+						cuadrex=-20
 						cuadrey=self.Tiles[y.pos].acomodoy=self.Tiles[y.pos].acomodoy+20
 
 					if(x.color=="green"):
-			
+
 						PANTALLA.blit(verde,(vector_posiciones(y.pos)[0]+cuadrex,vector_posiciones(y.pos)[1]+cuadrey))
-							
+
 					if(x.color=="red"):
-					
-	
+
+
 						PANTALLA.blit(rojo,(vector_posiciones(y.pos)[0]+cuadrex,vector_posiciones(y.pos)[1]+cuadrey))
 
 					if(x.color=="blue"):
-					
+
 						PANTALLA.blit(azul,(vector_posiciones(y.pos)[0]+cuadrex,vector_posiciones(y.pos)[1]+cuadrey))
-					
+
 					if(x.color=="yellow"):
 						PANTALLA.blit(amarillo,(vector_posiciones(y.pos)[0]+cuadrex,vector_posiciones(y.pos)[1]+cuadrey))
 
@@ -447,7 +448,7 @@ class tablero(object):
 		self.Tiles[5].salida=True
 		self.Tiles[5].color="yellow"
 		self.Tiles[12].seguro=True
-		
+
 		self.Tiles[22].salida=True
 		self.Tiles[22].color="blue"
 		self.Tiles[29].seguro=True
@@ -458,8 +459,8 @@ class tablero(object):
 
 		self.Tiles[56].salida=True
 		self.Tiles[56].color="green"
-		self.Tiles[63].seguro=True		
-#______________________________________________________________________		
+		self.Tiles[63].seguro=True
+#______________________________________________________________________
 class Jugador(object):
 
 	def __init__(self,nombre,color):
@@ -486,19 +487,19 @@ class Jugador(object):
 		for x in self.lista_fichas:
 			if(x.pos==pos):
 				self.lista_fichas.pop(iterador)
-			iterador+=1		
+			iterador+=1
 
 	def carcelon(self):
 		for x in self.lista_fichas:
 			if(x.pos!="carcel"):
 				return False
-		return True	
+		return True
 
 
 	def salircarcel(self):
 		pass
 #______________________________________________________________________
-class ficha(object):	
+class ficha(object):
 	def __init__(self,color):
 		self.pos="carcel"
 		self.seleccionada=False
@@ -519,7 +520,7 @@ class  logicadejuego(object):
 	def algunafichaencarcel(self,jugador):
 			for y in jugador.lista_fichas:
 				if(y.pos=="carcel"):
-					return True		
+					return True
 			return False
 
 	def pasarturnoo(self):
@@ -529,7 +530,7 @@ class  logicadejuego(object):
 				x.turno=False
 				if(contador+1>=len(self.listapersonajes)):
 					self.listapersonajes[0].turno=True
-				else:	
+				else:
 					self.listapersonajes[contador+1].turno=True
 				self.turno=True
 				return
@@ -541,7 +542,7 @@ class  logicadejuego(object):
 			if(x.turno==True):
 				if(contador+1>=len(self.listapersonajes)):
 					self.listapersonajes[0].turno=True
-				else:	
+				else:
 					self.listapersonajes[contador].turno=True
 				self.turno=True
 				return
@@ -603,7 +604,7 @@ class  logicadejuego(object):
 											y.vuelta=True
 											diferencia=(y.pos+dadillos)-y.pos
 											y.pos=77+diferencia
-											mapa.Tiles[y.pos].anexarocupante(y)							
+											mapa.Tiles[y.pos].anexarocupante(y)
 										else:
 											if(y.color=="green" and y.pos+dadillos>51 and pos<=51 and y.vuelta==False):
 												y.vuelta=True
@@ -621,7 +622,7 @@ class  logicadejuego(object):
 								mapa.Tiles[pos+dadillos].comer(y.color)
 								y.pos=y.pos+dadillos
 								mapa.Tiles[pos+dadillos].anexarocupante(y)
-							
+
 							if(y.color=="yellow" and y.pos>74):
 								x.lista_fichas.pop(contadore)
 
@@ -632,9 +633,9 @@ class  logicadejuego(object):
 								x.lista_fichas.pop(contadore)
 
 							if(y.color=="green" and y.pos>92):
-								x.lista_fichas.pop(contadore)		
-							
-				contadore+=1			
+								x.lista_fichas.pop(contadore)
+
+				contadore+=1
 
 			mapa.reload(lista_jugadores)
 			if(dadosjuego.dado1l==False and dadosjuego.dado2l==False):
@@ -672,11 +673,11 @@ class  logicadejuego(object):
 								mapa.Tiles[5].anexarocupante(y)
 				self.turno=False
 				return
-		
+
 		if(self.validarpos(mapa,pos)):
 			print("juegando")
 			self.enmovimientodeficha(dadosjuego,pos,mapa,listapersonajes)
-					
+
 	def pasarturno(self):
 		if(self.turno==True):
 			return False
@@ -687,7 +688,7 @@ class  dados(object):
 
 	def __init__(self):
 		self.dado1=3
-		self.dado2=3		
+		self.dado2=3
 		self.dado1l=True
 		self.dado2l=True
 
@@ -722,116 +723,142 @@ def validaganador(lista):
 
 def main():
 
-	cursor= Cursor()
+    #-----------------------conexion con el servidor-------------------------
+    host = "localhost"
+    port = 5000
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-	cerrar = menu(cursor, PANTALLA)
-	#cerrar = False
+    try :
+        s.connect((host, port))
+    except :
+        print ('No se puede conectar')
+        sys.exit()
 
-	#user is a dictionary with key username and value color
-	user = main_inputBox(cursor, PANTALLA)
-	print user
-	
-	cantidad=4 #cantidad de fichas
-	table=tablero() #tablero
-	table.pulir()
-	table.dibujarmapa()
-	
-	lista_jugadores=[] #lista donde van a ir todos los jugadores	
+    print ("Conectado por el puerto", port)
 
-	jugador1=Jugador("Leonardo",'green') 
-	jugador1.turno=True
-	jugador2=Jugador("Risas",'red')
-	jugador3=Jugador("Angelito",'yellow')		
-	jugador4=Jugador("Moli",'blue')	
-	
+    #-------------------------------------------------------------------------
 
-	lista_jugadores.append(jugador1)
-	lista_jugadores.append(jugador2)
-	lista_jugadores.append(jugador3)
-	lista_jugadores.append(jugador4)
-	cargarfichasjugadores(cantidad,lista_jugadores)
-	table.ponerjugadores(lista_jugadores)
-	logijuego=logicadejuego(lista_jugadores)
-	dadosjuego=dados()
+    cursor= Cursor()
 
-	marco_1=pygame.image.load("marco_1.png")
-	marco_1=Imagen(marco_1,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
-	marco_2=pygame.image.load("marco_2.png")
-	marco_2=Imagen(marco_2,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
-	dado_1=pygame.image.load("1.JPG")
-	dado_1=Dados(dado_1,(600/3)+(int(600/3)*0.25),int(((600)/3)+((600/3)*0.4)),int((600/3)*0.2),int((600/3)*0.2))
-	dado_2=pygame.image.load("2.JPG")
-	dado_2=Dados(dado_2,(600/3)+(int(600/3)*0.5),int((600)/3)+((600/3)*0.4),int((600/3)*0.2),int((600/3)*0.2))
+    cerrar = menu(cursor, PANTALLA)
 
-	empezar1 = pygame.image.load("botones/empezar1.jpg")
-	empezar1 = pygame.transform.scale(empezar1, (100,50))
-	empezar2 = pygame.image.load("botones/empezar2.jpg")
-	empezar2 = pygame.transform.scale(empezar2, (100,50))
+    while not cerrar:
+        print ("oda")
+        data_user = main_inputBox(cursor, PANTALLA)
+        s.send(data_user[0])
+        data = s.recv(4096)
+        print (data)
+        if (data == "Parques lleno, intentalo mas tarde"):
+            s.close()
+            sys.exit()
+        if (data == "Bienvenido"):
+            cerrar = True
 
-	boton_empezar = Boton(empezar1, empezar2, 650, 500)
-	
-	playdados=True
-	carce=False
-	contador=0 
-	while cerrar is not True:
-		for event in pygame.event.get():
-			if event.type==QUIT:
-				cerrar=True
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				mx,my = pygame.mouse.get_pos()
-				
-				if(logijuego.puedejugar=="Null"):
-					print("no se an tirado los datos por primera vez")
-				else:
-					if (logijuego.puedejugar.carcelon()==True and clickdado(mx,my)=="dado"):
-						contador+=1
-						for i in range(1,10):
-							dado_1.animacion(PANTALLA)
-							dado_2.animacion(PANTALLA)
-							pygame.display.flip()
-							time.sleep(0.05)
-						dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+    print data_user
+    return
+#     PANTALLA = pygame.display.set_mode([800, 600])
+# 	cantidad=4 #cantidad de fichas
+# 	table=tablero() #tablero
+# 	table.pulir()
+# 	table.dibujarmapa()
+#
+# 	lista_jugadores=[] #lista donde van a ir todos los jugadores
+#
+# 	jugador1=Jugador("Leonardo",'green')
+# 	jugador1.turno=True
+# 	jugador2=Jugador("Risas",'red')
+# 	jugador3=Jugador("Angelito",'yellow')
+# 	jugador4=Jugador("Moli",'blue')
+#
+#
+# 	lista_jugadores.append(jugador1)
+# 	lista_jugadores.append(jugador2)
+# 	lista_jugadores.append(jugador3)
+# 	lista_jugadores.append(jugador4)
+# 	cargarfichasjugadores(cantidad,lista_jugadores)
+# 	table.ponerjugadores(lista_jugadores)
+# 	logijuego=logicadejuego(lista_jugadores)
+# 	dadosjuego=dados()
+#
+# 	marco_1=pygame.image.load("marco_1.png")
+# 	marco_1=Imagen(marco_1,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
+# 	marco_2=pygame.image.load("marco_2.png")
+# 	marco_2=Imagen(marco_2,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
+# 	dado_1=pygame.image.load("1.JPG")
+# 	dado_1=Dados(dado_1,(600/3)+(int(600/3)*0.25),int(((600)/3)+((600/3)*0.4)),int((600/3)*0.2),int((600/3)*0.2))
+# 	dado_2=pygame.image.load("2.JPG")
+# 	dado_2=Dados(dado_2,(600/3)+(int(600/3)*0.5),int((600)/3)+((600/3)*0.4),int((600/3)*0.2),int((600/3)*0.2))
+#
+# 	empezar1 = pygame.image.load("botones/empezar1.jpg")
+# 	empezar1 = pygame.transform.scale(empezar1, (100,50))
+# 	empezar2 = pygame.image.load("botones/empezar2.jpg")
+# 	empezar2 = pygame.transform.scale(empezar2, (100,50))
+#
+# 	boton_empezar = Boton(empezar1, empezar2, 650, 500)
+#
+# 	playdados=True
+# 	carce=False
+# 	contador=0
+# 	while cerrar is not True:
+# 		for event in pygame.event.get():
+# 			if event.type==QUIT:
+# 				cerrar=True
+# 			if event.type == pygame.MOUSEBUTTONDOWN:
+# 				mx,my = pygame.mouse.get_pos()
+#
+# 				if(logijuego.puedejugar=="Null"):
+# 					print("no se an tirado los datos por primera vez")
+# 				else:
+# 					if (logijuego.puedejugar.carcelon()==True and clickdado(mx,my)=="dado"):
+# 						contador+=1
+# 						for i in range(1,10):
+# 							dado_1.animacion(PANTALLA)
+# 							dado_2.animacion(PANTALLA)
+# 							pygame.display.flip()
+# 							time.sleep(0.05)
+# 						dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+#
+# 				if(contador>=3):
+# 					logijuego.pasarturnoo()
+# 					contador=0
+#
+# 				if(playdados==True and  clickdado(mx,my)=="dado"):
+# 					for i in range(1,10):
+# 						dado_1.animacion(PANTALLA)
+# 						dado_2.animacion(PANTALLA)
+# 						pygame.display.flip()
+# 						time.sleep(0.05)
+# 					dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+# 					playdados=False
+# 				else:
+# 					print("TIRAR DADOS POR FAVOR")
+#
+# 				if(playdados==False):
+# 					logijuego.jugar(lista_jugadores,click(mx,my),dadosjuego,table)
+#
+# 				if(logijuego.turno==False and playdados==False):
+# 					table.dibujarmapa()
+# 					table.ponerjugadores(lista_jugadores)
+# 					if(dado_1.valor!=dado_2.valor):
+# 						logijuego.pasarturnoo()
+# 					else:
+# 						logijuego.pasarturnoorepetir()
+# 					playdados=True
+# 					contador=0
+#
+#
+# 			if(validaganador(lista_jugadores)):
+# 				pass
+#
+#
+#
+# 		marco_1.dibujar(PANTALLA)
+# 		dado_1.dibujar(PANTALLA)
+# 		dado_2.dibujar(PANTALLA)
+# 		marco_2.dibujar(PANTALLA)
+# 		boton_empezar.accion(PANTALLA, cursor)
+# 		pygame.display.update()
 
-				if(contador>=3):
-					logijuego.pasarturnoo()					
-					contador=0
-
-				if(playdados==True and  clickdado(mx,my)=="dado"):
-					for i in range(1,10):
-						dado_1.animacion(PANTALLA)
-						dado_2.animacion(PANTALLA)
-						pygame.display.flip()
-						time.sleep(0.05)
-					dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
-					playdados=False
-				else:
-					print("TIRAR DADOS POR FAVOR")
-
-				if(playdados==False):
-					logijuego.jugar(lista_jugadores,click(mx,my),dadosjuego,table)
-
-				if(logijuego.turno==False and playdados==False):
-					table.dibujarmapa()
-					table.ponerjugadores(lista_jugadores)
-					if(dado_1.valor!=dado_2.valor):
-						logijuego.pasarturnoo()
-					else:
-						logijuego.pasarturnoorepetir()
-					playdados=True
-					contador=0
-					
-			
-			if(validaganador(lista_jugadores)):
-				pass
-
-
-
-		marco_1.dibujar(PANTALLA)
-		dado_1.dibujar(PANTALLA)
-		dado_2.dibujar(PANTALLA)
-		marco_2.dibujar(PANTALLA)
-		boton_empezar.accion(PANTALLA, cursor)
-		pygame.display.update()
 main()
 
 ##ERROR 41 42

@@ -29,7 +29,7 @@ azul1 = pygame.image.load("azul.png")
 azul1= pygame.transform.scale(azul1, (50,50))
 azul2 = pygame.image.load("ficha_azul_2.png")
 azul2= pygame.transform.scale(azul2, (50,50))
-amarillo1 = pygame.image.load("amarilla.png") 
+amarillo1 = pygame.image.load("amarilla.png")
 amarillo1= pygame.transform.scale(amarillo1, (50,50))
 amarillo2 = pygame.image.load("ficha_amarillo_2.png")
 amarillo2= pygame.transform.scale(amarillo2, (50,50))
@@ -39,7 +39,7 @@ boton_verde = Boton(verde1,verde2,160,100)
 boton_azul = Boton(azul1,azul2,220,100)
 boton_amarillo = Boton(amarillo1,amarillo2,280,100)
 
-color = "" 
+color = ""
 current_color = None
 
 def get_key(cursor, screen, current_color):
@@ -109,11 +109,8 @@ def ask(screen, question, cursor):
     display_box(screen, question + ": " + string.join(current_string,""), cursor, 100, 20)
     display_box(screen, mesagge_color, cursor, 150, 180)
 
-  dic = {}
-  dic[string.join(current_string,"")] = current_color
-
-  screen = pygame.display.set_mode([800, 600])  
-  return dic
+  #screen = pygame.display.set_mode([800, 600])
+  return (string.join(current_string,""),current_color)
 
 def main_inputBox(cursor, screen):
   screen = pygame.display.set_mode((500,240))
