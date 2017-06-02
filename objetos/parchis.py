@@ -743,11 +743,12 @@ def main():
     cerrar = menu(cursor, PANTALLA)
 
     error_usuario = ""
+    error_color = ""
 
     while not cerrar:
         print ("oda")
-        data_user = main_inputBox(cursor, PANTALLA, error_usuario)
-        s.send(data_user[0])
+        data_user = main_inputBox(cursor, PANTALLA, error_usuario, error_color)
+        s.send(data_user)
         data = s.recv(4096)
         print (data)
         if (data == "Parques lleno, intentalo mas tarde"):
@@ -756,8 +757,13 @@ def main():
         if (data == "Bienvenido"):
             cerrar = True
         if (data == "Nombre de usuario ya ha sido utilizado\n"):
-        	print ("entro")
         	error_usuario = "Nombre de usuario ya ha sido utilizado"
+        else:
+        	error_usuario = ""
+        if (data == "Color ya ha sido utilizado\n"):
+        	error_color = "Color ya ha sido utilizado"
+        else:
+        	error_color = ""
 
     print data_user
     return

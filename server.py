@@ -20,20 +20,24 @@ def getUsername(sock, dic):
     return None
 
 
-def verifyUser(new_client, dic, CONNECTION_LIST, sock):
+def verifyUser(new_client, dic, CONNECTION_LIST, sock,COLOR_LIST, users_colors):
     while True:
         #new_client.send("Ingresa un nombre de usuario: ")
-        user = new_client.recv(1024)
+        user = new_client.recv(1024).split()
         print "User: %s" %user
-
-        if (user in dic):
+        if (user[1] not in COLOR_LIST):
+            new_client.send("Color ya ha sido utilizado\n")
+        elif (user[0] in dic):
             new_client.send("Nombre de usuario ya ha sido utilizado\n")
+
         else:
+            COLOR_LIST.remove(user[1])
             CONNECTION_LIST.append(new_client)
-            dic[user] = new_client
+            dic[user[0]] = new_client
+            users_colors[user[0]] = user[1]
             new_client.send("Bienvenido")
             break
-    return user
+    return user[0]
 
 # Encuentra el socket segun un nombre de usuario
 def getSocket(username, dic):
@@ -53,6 +57,7 @@ if __name__ == "__main__":
 
     # List to keep track of socket descriptors
     CONNECTION_LIST = [] # jugadores
+    COLOR_LIST = ["rojo","verde","amarillo","azul"]
     RECV_BUFFER = 4096 # Advisable to keep it as an exponent of 2
     PORT = 5000
     turno = 1 # turnos de los jugadores
@@ -67,6 +72,7 @@ if __name__ == "__main__":
     print ("Chat server started on port " + str(PORT))
 
     users_list = {}
+    users_colors = {}
 
     while True:
         turno %= 5 # que no se pase de 4
@@ -88,7 +94,7 @@ if __name__ == "__main__":
                     sockfd.send("Parques lleno, intentalo mas tarde")
                     break
 
-                username = verifyUser(sockfd, users_list, CONNECTION_LIST, sock)
+                username = verifyUser(sockfd, users_list, CONNECTION_LIST, sock, COLOR_LIST, users_colors)
 
                 broadcast_data(sockfd, username + " entered room\n")
 
