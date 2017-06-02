@@ -31,7 +31,7 @@ def verifyUser(new_client, dic, CONNECTION_LIST, sock):
         else:
             CONNECTION_LIST.append(new_client)
             dic[user] = new_client
-            new_client.send("Bienvenido al chat")
+            new_client.send("Bienvenido")
             break
     return user
 
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # Add server socket to the list of readable connections
     CONNECTION_LIST.append(server_socket) # no se tiene en cuenta esta primera posicion en los jugadores
 
-    print "Chat server started on port " + str(PORT)
+    print ("Chat server started on port " + str(PORT))
 
     users_list = {}
 
