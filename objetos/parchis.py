@@ -18,39 +18,39 @@ PANTALLA = pygame.display.set_mode([ANCHO_PANTALLA,ALTO])
 
 
 class Imagen(pygame.sprite.Sprite):
-    def __init__(self,imagen,x,y,ancho,alto):
-    	self.ancho=ancho
-    	self.alto=alto
-    	self.imagen= imagen
-    	self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
-    	self.rect=self.imagen.get_rect()
-    	self.rect.left,self.rect.top=x,y
+	def __init__(self,imagen,x,y,ancho,alto):
+		self.ancho=ancho
+		self.alto=alto
+		self.imagen= imagen
+		self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
+		self.rect=self.imagen.get_rect()
+		self.rect.left,self.rect.top=x,y
 
-    def dibujar(self,pantalla):
-        pantalla.blit(self.imagen,self.rect)
+	def dibujar(self,pantalla):
+		pantalla.blit(self.imagen,self.rect)
 
 
 
 class Dados(pygame.sprite.Sprite):
-    def __init__(self,imagen,x,y,ancho,alto):
-    	self.ancho=ancho
-    	self.alto=alto
-    	self.valor=0;
-    	self.imagen= imagen
-    	self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
-    	self.rect=self.imagen.get_rect()
-    	self.rect.left,self.rect.top=x,y
+	def __init__(self,imagen,x,y,ancho,alto):
+		self.ancho=ancho
+		self.alto=alto
+		self.valor=0;
+		self.imagen= imagen
+		self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
+		self.rect=self.imagen.get_rect()
+		self.rect.left,self.rect.top=x,y
 
-    def dibujar(self,pantalla):
-        pantalla.blit(self.imagen,self.rect)
+	def dibujar(self,pantalla):
+		pantalla.blit(self.imagen,self.rect)
 
-    def animacion(self,pantalla):
-    	cont= random.randrange(1, 7)
-    	self.valor=cont
-    	self.imagen=pygame.image.load(str(cont)+".JPG")
-    	self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
-    	pantalla.blit(self.imagen,self.rect)
-    	return(cont)
+	def animacion(self,pantalla):
+		cont= random.randrange(1, 7)
+		self.valor=cont
+		self.imagen=pygame.image.load(str(cont)+".JPG")
+		self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
+		pantalla.blit(self.imagen,self.rect)
+		return(cont)
 ##################################################################################
 
 class Tile(object):
@@ -102,7 +102,7 @@ def click(mx,my):
 
 	if(mx==2 and my==2):
 		return  "blue"
-    #Cordenadas de secciones
+	#Cordenadas de secciones
 
 	if(mx==1 and my==0):
 		# print("seccion verde y roja")
@@ -742,123 +742,110 @@ def mostrarJugadores(lista_jugadores, PANTALLA, cursor):
 
 def main():
 
-    #-----------------------conexion con el servidor-------------------------
-    host = "localhost"
-    port = 5000
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	#-----------------------conexion con el servidor-------------------------
+	host = "localhost"
+	port = 5000
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    try :
-        s.connect((host, port))
-    except :
-        print ('No se puede conectar')
-        sys.exit()
+	try :
+		s.connect((host, port))
+	except :
+		print ('No se puede conectar')
+		sys.exit()
 
-    print ("Conectado por el puerto", port)
+	print ("Conectado por el puerto", port)
 
-    #-------------------------------------------------------------------------
+	#-------------------------------------------------------------------------
 
-    cursor= Cursor()
+	cursor= Cursor()
 
-    PANTALLA = pygame.display.set_mode([ANCHO_PANTALLA,ALTO])
-    cerrar = menu(cursor, PANTALLA)
+	PANTALLA = pygame.display.set_mode([ANCHO_PANTALLA,ALTO])
+	cerrar = menu(cursor, PANTALLA)
 
-    error_usuario = ""
-    error_color = ""
+	error_usuario = ""
+	error_color = ""
 
-    while not cerrar:
-        data_user = main_inputBox(cursor, PANTALLA, error_usuario, error_color)
-        s.send(data_user)
-        data = s.recv(4096)
-        print (data)
-        if (data == "Parques lleno, intentalo mas tarde"):
-            s.close()
-            sys.exit()
-        if (data == "Bienvenido"):
-            cerrar = True
-        if (data == "Nombre de usuario ya ha sido utilizado\n"):
-        	error_usuario = "Nombre de usuario ya ha sido utilizado"
-        else:
-        	error_usuario = ""
-        if (data == "Color ya ha sido utilizado\n"):
-        	error_color = "Color ya ha sido utilizado"
-        else:
-        	error_color = ""
+	while not cerrar:
+		data_user = main_inputBox(cursor, PANTALLA, error_usuario, error_color)
+		s.send(data_user)
+		data = s.recv(4096)
+		print (data)
+		if (data == "Parques lleno, intentalo mas tarde"):
+			s.close()
+			sys.exit()
+		if (data == "Bienvenido"):
+			cerrar = True
+		if (data == "Nombre de usuario ya ha sido utilizado\n"):
+			error_usuario = "Nombre de usuario ya ha sido utilizado"
+		else:
+			error_usuario = ""
+		if (data == "Color ya ha sido utilizado\n"):
+			error_color = "Color ya ha sido utilizado"
+		else:
+			error_color = ""
 
-    #print data_user
+	#print data_user
 
-    #variable que contiene el usuario propio
-    usuario_cliente = data_user.split()[0]
+	#variable que contiene el usuario propio
+	usuario_cliente = data_user.split()[0]
 
-    print usuario_cliente
-    
-    PANTALLA = pygame.display.set_mode([800, 600])
-    cantidad=4 #cantidad de fichas
-    table=tablero() #tablero
-    table.pulir()
-    table.dibujarmapa()
-    lista_jugadores=[] #lista donde van a ir todos los jugadores
+	print usuario_cliente
 
-    agregarJugador(lista_jugadores, data_user)
-    lista_jugadores[0].turno = True
+	PANTALLA = pygame.display.set_mode([800, 600])
+	cantidad=4 #cantidad de fichas
+	table=tablero() #tablero
+	table.pulir()
+	table.dibujarmapa()
+	lista_jugadores=[] #lista donde van a ir todos los jugadores
 
-    # jugador1=Jugador("Leonardo",'green')
-    # jugador1.turno=True
-    # jugador2=Jugador("Risas",'red')
-    # jugador3=Jugador("Angelito",'yellow')
-    # jugador4=Jugador("Moli",'blue')
+	agregarJugador(lista_jugadores, data_user)
+	lista_jugadores[0].turno = True
 
-    # lista_jugadores.append(jugador1)
-    # lista_jugadores.append(jugador2)
-    # lista_jugadores.append(jugador3)
-    # lista_jugadores.append(jugador4)
-    
-    # cargarfichasjugadores(cantidad,lista_jugadores)
-    # table.ponerjugadores(lista_jugadores)
-    # logijuego=logicadejuego(lista_jugadores)
-    # dadosjuego=dados()
-    marco_1=pygame.image.load("marco_1.png")
-    marco_1=Imagen(marco_1,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
-    marco_2=pygame.image.load("marco_2.png")
-    marco_2=Imagen(marco_2,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
-    dado_1=pygame.image.load("1.JPG")
-    dado_1=Dados(dado_1,(600/3)+(int(600/3)*0.25),int(((600)/3)+((600/3)*0.4)),int((600/3)*0.2),int((600/3)*0.2))
-    dado_2=pygame.image.load("2.JPG")
-    dado_2=Dados(dado_2,(600/3)+(int(600/3)*0.5),int((600)/3)+((600/3)*0.4),int((600/3)*0.2),int((600/3)*0.2))
+	marco_1=pygame.image.load("marco_1.png")
+	marco_1=Imagen(marco_1,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
+	marco_2=pygame.image.load("marco_2.png")
+	marco_2=Imagen(marco_2,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
+	dado_1=pygame.image.load("1.JPG")
+	dado_1=Dados(dado_1,(600/3)+(int(600/3)*0.25),int(((600)/3)+((600/3)*0.4)),int((600/3)*0.2),int((600/3)*0.2))
+	dado_2=pygame.image.load("2.JPG")
+	dado_2=Dados(dado_2,(600/3)+(int(600/3)*0.5),int((600)/3)+((600/3)*0.4),int((600/3)*0.2),int((600/3)*0.2))
 
-    empezar1 = pygame.image.load("botones/empezar1.jpg")
-    empezar1 = pygame.transform.scale(empezar1, (100,50))
-    empezar2 = pygame.image.load("botones/empezar2.jpg")
-    empezar2 = pygame.transform.scale(empezar2, (100,50))
+	empezar1 = pygame.image.load("botones/empezar1.jpg")
+	empezar1 = pygame.transform.scale(empezar1, (100,50))
+	empezar2 = pygame.image.load("botones/empezar2.jpg")
+	empezar2 = pygame.transform.scale(empezar2, (100,50))
 
-    boton_empezar = Boton(empezar1, empezar2, 650, 500)
+	boton_empezar = Boton(empezar1, empezar2, 650, 500)
 
-    playdados=True
-    carce=False
-    contador=0
-    cerrar = True
-    iniciarJuego= False
-    flag = True
- 
-    while cerrar is not False:
-    	if(iniciarJuego):
-    		print("Entro a iniciarjuego")
-    		cargarfichasjugadores(cantidad,lista_jugadores)
-    		table.ponerjugadores(lista_jugadores)
-    		logijuego=logicadejuego(lista_jugadores)
-    		dadosjuego=dados()
-    		for i in lista_jugadores:
-    			print("Jugador: %s, fichas: %s" %(i.nombre, str(len(i.lista_fichas))))
-    		iniciarJuego = False
-    		
-    	for event in pygame.event.get():
+	playdados=True
+	carce=False
+	contador=0
+	cerrar = True
+	iniciarJuego= False
+	flag = True
+	jugando = False
+
+	while cerrar is not False:
+		if(iniciarJuego):
+			print("Entro a iniciarjuego")
+			cargarfichasjugadores(cantidad,lista_jugadores)
+			table.ponerjugadores(lista_jugadores)
+			logijuego=logicadejuego(lista_jugadores)
+			dadosjuego=dados()
+			for i in lista_jugadores:
+				print("Jugador: %s, fichas: %s" %(i.nombre, str(len(i.lista_fichas))))
+			iniciarJuego = False
+			jugando = True
+
+		for event in pygame.event.get():
 			if event.type==QUIT:
 				cerrar=False
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				mx,my = pygame.mouse.get_pos()
 
-				if(logijuego.puedejugar=="Null"): 
+				if(logijuego.puedejugar=="Null"):
 					print("no se an tirado los datos por primera vez")
-				else:
+				elif (jugando):
 					if (logijuego.puedejugar.carcelon()==True and clickdado(mx,my)=="dado"):
 						contador+=1
 						for i in range(1,10):
@@ -897,23 +884,23 @@ def main():
 					contador=0
 
 			if(validaganador(lista_jugadores)):
-				pass	
+				pass
 
-        mostrarJugadores(lista_jugadores, PANTALLA, cursor)
-        marco_1.dibujar(PANTALLA)
-        dado_1.dibujar(PANTALLA)
-        dado_2.dibujar(PANTALLA)
-        marco_2.dibujar(PANTALLA)
-        boton_empezar.accion(PANTALLA, cursor)
-        pygame.display.update()
+		mostrarJugadores(lista_jugadores, PANTALLA, cursor)
+		marco_1.dibujar(PANTALLA)
+		dado_1.dibujar(PANTALLA)
+		dado_2.dibujar(PANTALLA)
+		marco_2.dibujar(PANTALLA)
+		boton_empezar.accion(PANTALLA, cursor)
+		pygame.display.update()
 
-        if(len(lista_jugadores)<cantidad):
-            esperarJugadores(lista_jugadores, s)
-        elif not(iniciarJuego) and flag:
-        	iniciarJuego = True
-        	flag = False
+		if(len(lista_jugadores)<cantidad):
+			esperarJugadores(lista_jugadores, s)
+		elif not(iniciarJuego) and flag:
+			iniciarJuego = True
+			flag = False
 
-            
+
 
 
 main()
