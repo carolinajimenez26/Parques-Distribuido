@@ -26,6 +26,7 @@ def menu(cursor, PANTALLA):
         tecla = pygame.key.get_pressed()
         for event in pygame.event.get():
             if event.type == QUIT:
+                val = True
                 cerrar = True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if cursor.colliderect(boton1.rect):
@@ -34,7 +35,7 @@ def menu(cursor, PANTALLA):
                 if cursor.colliderect(boton2.rect):
                     val = True
                     cerrar = False
-                
+
         cursor.posicion()
         PANTALLA.blit(fondo,(0,0))
         boton1.accion(PANTALLA,cursor)

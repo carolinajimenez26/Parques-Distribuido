@@ -27,6 +27,8 @@ def verifyUser(new_client, dic, CONNECTION_LIST, sock,COLOR_LIST, users_colors):
         #new_client.send("Ingresa un nombre de usuario: ")
         user = new_client.recv(1024).split()
         print "User: %s" %user
+        if (len(user) == 0): # error
+            continue
         if (user[1] not in COLOR_LIST):
             new_client.send("Color ya ha sido utilizado\n")
         elif (user[0] in dic):
@@ -59,7 +61,7 @@ if __name__ == "__main__":
 
     # List to keep track of socket descriptors
     CONNECTION_LIST = [] # jugadores
-    COLOR_LIST = ["rojo","verde","amarillo","azul"]
+    COLOR_LIST = ["red","green","yellow","blue"]
     RECV_BUFFER = 4096 # Advisable to keep it as an exponent of 2
     PORT = 5000
     turno = 1 # turnos de los jugadores

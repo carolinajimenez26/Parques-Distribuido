@@ -50,13 +50,13 @@ def get_key(cursor, screen, current_color):
         break
     if event.type == pygame.MOUSEBUTTONDOWN:
       if cursor.colliderect(boton_rojo.rect):
-        color = "rojo"
+        color = "red"
       if cursor.colliderect(boton_verde.rect):
-        color = "verde"
+        color = "green"
       if cursor.colliderect(boton_azul.rect):
-        color = "azul"
+        color = "blue"
       if cursor.colliderect(boton_amarillo.rect):
-        color = "amarillo"
+        color = "yellow"
     if event.type == KEYDOWN:
       return event.key, color
 
@@ -112,7 +112,7 @@ def ask(screen, question, cursor, usr_err, color_err):
     display_box(screen, mesagge_color, cursor, 150, 170)
     display_box(screen, usr_err, cursor, 120, 200)
     display_box(screen, color_err, cursor, 120, 250)
-    
+
 
   #screen = pygame.display.set_mode([800, 600])
   return string.join(current_string,"") + " " + current_color
