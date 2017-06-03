@@ -721,6 +721,25 @@ def cargarfichasjugadores(cantidad,lista):
 def validaganador(lista):
 	return False
 
+def agregarJugador(lista_jugadores, nuevoJugador):
+	nuevojug = nuevoJugador.split()
+	lista_jugadores.append(Jugador(nuevojug[0],nuevojug[1]))
+	return
+
+def esperarJugadores(lista_jugadores, s):
+	data = s.recv(4096) #s es el socket
+	print "Jugador entrante %s" %data
+	agregarJugador(lista_jugadores, data)
+	return
+
+def mostrarJugadores(lista_jugadores, PANTALLA, cursor):
+	xj = 630; yj = 130
+	display_box(PANTALLA, 'Jugadores', cursor, xj, yj)
+	for jug in lista_jugadores:
+		yj += 40
+		display_box(PANTALLA, "%s -> %s" %(jug.color, jug.nombre), cursor, xj, yj)
+	return
+
 def main():
 
     #-----------------------conexion con el servidor-------------------------
@@ -740,13 +759,13 @@ def main():
 
     cursor= Cursor()
 
+    PANTALLA = pygame.display.set_mode([ANCHO_PANTALLA,ALTO])
     cerrar = menu(cursor, PANTALLA)
 
     error_usuario = ""
     error_color = ""
 
     while not cerrar:
-        print ("oda")
         data_user = main_inputBox(cursor, PANTALLA, error_usuario, error_color)
         s.send(data_user)
         data = s.recv(4096)
@@ -765,110 +784,137 @@ def main():
         else:
         	error_color = ""
 
-    print data_user
-    return
-#     PANTALLA = pygame.display.set_mode([800, 600])
-# 	cantidad=4 #cantidad de fichas
-# 	table=tablero() #tablero
-# 	table.pulir()
-# 	table.dibujarmapa()
-#
-# 	lista_jugadores=[] #lista donde van a ir todos los jugadores
-#
-# 	jugador1=Jugador("Leonardo",'green')
-# 	jugador1.turno=True
-# 	jugador2=Jugador("Risas",'red')
-# 	jugador3=Jugador("Angelito",'yellow')
-# 	jugador4=Jugador("Moli",'blue')
-#
-#
-# 	lista_jugadores.append(jugador1)
-# 	lista_jugadores.append(jugador2)
-# 	lista_jugadores.append(jugador3)
-# 	lista_jugadores.append(jugador4)
-# 	cargarfichasjugadores(cantidad,lista_jugadores)
-# 	table.ponerjugadores(lista_jugadores)
-# 	logijuego=logicadejuego(lista_jugadores)
-# 	dadosjuego=dados()
-#
-# 	marco_1=pygame.image.load("marco_1.png")
-# 	marco_1=Imagen(marco_1,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
-# 	marco_2=pygame.image.load("marco_2.png")
-# 	marco_2=Imagen(marco_2,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
-# 	dado_1=pygame.image.load("1.JPG")
-# 	dado_1=Dados(dado_1,(600/3)+(int(600/3)*0.25),int(((600)/3)+((600/3)*0.4)),int((600/3)*0.2),int((600/3)*0.2))
-# 	dado_2=pygame.image.load("2.JPG")
-# 	dado_2=Dados(dado_2,(600/3)+(int(600/3)*0.5),int((600)/3)+((600/3)*0.4),int((600/3)*0.2),int((600/3)*0.2))
-#
-# 	empezar1 = pygame.image.load("botones/empezar1.jpg")
-# 	empezar1 = pygame.transform.scale(empezar1, (100,50))
-# 	empezar2 = pygame.image.load("botones/empezar2.jpg")
-# 	empezar2 = pygame.transform.scale(empezar2, (100,50))
-#
-# 	boton_empezar = Boton(empezar1, empezar2, 650, 500)
-#
-# 	playdados=True
-# 	carce=False
-# 	contador=0
-# 	while cerrar is not True:
-# 		for event in pygame.event.get():
-# 			if event.type==QUIT:
-# 				cerrar=True
-# 			if event.type == pygame.MOUSEBUTTONDOWN:
-# 				mx,my = pygame.mouse.get_pos()
-#
-# 				if(logijuego.puedejugar=="Null"):
-# 					print("no se an tirado los datos por primera vez")
-# 				else:
-# 					if (logijuego.puedejugar.carcelon()==True and clickdado(mx,my)=="dado"):
-# 						contador+=1
-# 						for i in range(1,10):
-# 							dado_1.animacion(PANTALLA)
-# 							dado_2.animacion(PANTALLA)
-# 							pygame.display.flip()
-# 							time.sleep(0.05)
-# 						dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
-#
-# 				if(contador>=3):
-# 					logijuego.pasarturnoo()
-# 					contador=0
-#
-# 				if(playdados==True and  clickdado(mx,my)=="dado"):
-# 					for i in range(1,10):
-# 						dado_1.animacion(PANTALLA)
-# 						dado_2.animacion(PANTALLA)
-# 						pygame.display.flip()
-# 						time.sleep(0.05)
-# 					dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
-# 					playdados=False
-# 				else:
-# 					print("TIRAR DADOS POR FAVOR")
-#
-# 				if(playdados==False):
-# 					logijuego.jugar(lista_jugadores,click(mx,my),dadosjuego,table)
-#
-# 				if(logijuego.turno==False and playdados==False):
-# 					table.dibujarmapa()
-# 					table.ponerjugadores(lista_jugadores)
-# 					if(dado_1.valor!=dado_2.valor):
-# 						logijuego.pasarturnoo()
-# 					else:
-# 						logijuego.pasarturnoorepetir()
-# 					playdados=True
-# 					contador=0
-#
-#
-# 			if(validaganador(lista_jugadores)):
-# 				pass
-#
-#
-#
-# 		marco_1.dibujar(PANTALLA)
-# 		dado_1.dibujar(PANTALLA)
-# 		dado_2.dibujar(PANTALLA)
-# 		marco_2.dibujar(PANTALLA)
-# 		boton_empezar.accion(PANTALLA, cursor)
-# 		pygame.display.update()
+    #print data_user
+
+    #variable que contiene el usuario propio
+    usuario_cliente = data_user.split()[0]
+
+    print usuario_cliente
+    
+    PANTALLA = pygame.display.set_mode([800, 600])
+    cantidad=4 #cantidad de fichas
+    table=tablero() #tablero
+    table.pulir()
+    table.dibujarmapa()
+    lista_jugadores=[] #lista donde van a ir todos los jugadores
+
+    agregarJugador(lista_jugadores, data_user)
+    lista_jugadores[0].turno = True
+
+    # jugador1=Jugador("Leonardo",'green')
+    # jugador1.turno=True
+    # jugador2=Jugador("Risas",'red')
+    # jugador3=Jugador("Angelito",'yellow')
+    # jugador4=Jugador("Moli",'blue')
+
+    # lista_jugadores.append(jugador1)
+    # lista_jugadores.append(jugador2)
+    # lista_jugadores.append(jugador3)
+    # lista_jugadores.append(jugador4)
+    
+    # cargarfichasjugadores(cantidad,lista_jugadores)
+    # table.ponerjugadores(lista_jugadores)
+    # logijuego=logicadejuego(lista_jugadores)
+    # dadosjuego=dados()
+    marco_1=pygame.image.load("marco_1.png")
+    marco_1=Imagen(marco_1,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
+    marco_2=pygame.image.load("marco_2.png")
+    marco_2=Imagen(marco_2,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
+    dado_1=pygame.image.load("1.JPG")
+    dado_1=Dados(dado_1,(600/3)+(int(600/3)*0.25),int(((600)/3)+((600/3)*0.4)),int((600/3)*0.2),int((600/3)*0.2))
+    dado_2=pygame.image.load("2.JPG")
+    dado_2=Dados(dado_2,(600/3)+(int(600/3)*0.5),int((600)/3)+((600/3)*0.4),int((600/3)*0.2),int((600/3)*0.2))
+
+    empezar1 = pygame.image.load("botones/empezar1.jpg")
+    empezar1 = pygame.transform.scale(empezar1, (100,50))
+    empezar2 = pygame.image.load("botones/empezar2.jpg")
+    empezar2 = pygame.transform.scale(empezar2, (100,50))
+
+    boton_empezar = Boton(empezar1, empezar2, 650, 500)
+
+    playdados=True
+    carce=False
+    contador=0
+    cerrar = True
+    iniciarJuego= False
+    flag = True
+ 
+    while cerrar is not False:
+    	if(iniciarJuego):
+    		print("Entro a iniciarjuego")
+    		cargarfichasjugadores(cantidad,lista_jugadores)
+    		table.ponerjugadores(lista_jugadores)
+    		logijuego=logicadejuego(lista_jugadores)
+    		dadosjuego=dados()
+    		for i in lista_jugadores:
+    			print("Jugador: %s, fichas: %s" %(i.nombre, str(len(i.lista_fichas))))
+    		iniciarJuego = False
+    		
+    	for event in pygame.event.get():
+			if event.type==QUIT:
+				cerrar=False
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				mx,my = pygame.mouse.get_pos()
+
+				if(logijuego.puedejugar=="Null"): 
+					print("no se an tirado los datos por primera vez")
+				else:
+					if (logijuego.puedejugar.carcelon()==True and clickdado(mx,my)=="dado"):
+						contador+=1
+						for i in range(1,10):
+							dado_1.animacion(PANTALLA)
+							dado_2.animacion(PANTALLA)
+							pygame.display.flip()
+							time.sleep(0.05)
+						dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+
+				if(contador>=3):
+					logijuego.pasarturnoo()
+					contador=0
+
+				if(playdados==True and  clickdado(mx,my)=="dado"):
+					for i in range(1,10):
+						dado_1.animacion(PANTALLA)
+						dado_2.animacion(PANTALLA)
+						pygame.display.flip()
+						time.sleep(0.05)
+					dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+					playdados=False
+				else:
+					print("TIRAR DADOS POR FAVOR")
+
+				if(playdados==False):
+					logijuego.jugar(lista_jugadores,click(mx,my),dadosjuego,table)
+
+				if(logijuego.turno==False and playdados==False):
+					table.dibujarmapa()
+					table.ponerjugadores(lista_jugadores)
+					if(dado_1.valor!=dado_2.valor):
+						logijuego.pasarturnoo()
+					else:
+						logijuego.pasarturnoorepetir()
+					playdados=True
+					contador=0
+
+			if(validaganador(lista_jugadores)):
+				pass	
+
+        mostrarJugadores(lista_jugadores, PANTALLA, cursor)
+        marco_1.dibujar(PANTALLA)
+        dado_1.dibujar(PANTALLA)
+        dado_2.dibujar(PANTALLA)
+        marco_2.dibujar(PANTALLA)
+        boton_empezar.accion(PANTALLA, cursor)
+        pygame.display.update()
+
+        if(len(lista_jugadores)<cantidad):
+            esperarJugadores(lista_jugadores, s)
+        elif not(iniciarJuego) and flag:
+        	iniciarJuego = True
+        	flag = False
+
+            
+
 
 main()
 

@@ -32,8 +32,8 @@ def menu(cursor, PANTALLA):
                     val = False
                     cerrar = True
                 if cursor.colliderect(boton2.rect):
-                    cerrar = True
                     val = True
+                    cerrar = False
                 
         cursor.posicion()
         PANTALLA.blit(fondo,(0,0))

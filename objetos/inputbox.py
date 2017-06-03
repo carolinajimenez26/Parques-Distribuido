@@ -106,7 +106,7 @@ def ask(screen, question, cursor, usr_err, color_err):
     elif inkey <= 127:
       if (len(current_string) <= 10):
         current_string.append(chr(inkey))
-    print "Color seleccionado: %s" %current_color
+    #print "Color seleccionado: %s" %current_color
 
     display_box(screen, question + ": " + string.join(current_string,""), cursor, 100, 20)
     display_box(screen, mesagge_color, cursor, 150, 170)

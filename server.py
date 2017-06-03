@@ -1,4 +1,6 @@
 import socket, select
+import string
+
 
 #Function to broadcast chat messages to all connected clients
 def broadcast_data (sock, message):
@@ -37,7 +39,7 @@ def verifyUser(new_client, dic, CONNECTION_LIST, sock,COLOR_LIST, users_colors):
             users_colors[user[0]] = user[1]
             new_client.send("Bienvenido")
             break
-    return user[0]
+    return string.join(user," ")
 
 # Encuentra el socket segun un nombre de usuario
 def getSocket(username, dic):
@@ -79,7 +81,7 @@ if __name__ == "__main__":
         if (turno == 0):
             turno += 1 # no se puede tomar el socket del servidor
 
-        print "Turno : " + str(turno)
+        #print "Turno : " + str(turno)
 
         # Get the list sockets which are ready to be read through select
         read_sockets,write_sockets,error_sockets = select.select(CONNECTION_LIST,[],[])
@@ -96,7 +98,7 @@ if __name__ == "__main__":
 
                 username = verifyUser(sockfd, users_list, CONNECTION_LIST, sock, COLOR_LIST, users_colors)
 
-                broadcast_data(sockfd, username + " entered room\n")
+                broadcast_data(sockfd, username)
 
             #Some incoming message from a client
             else:
