@@ -3,7 +3,7 @@ import string
 
 
 #Function to broadcast chat messages to all connected clients
-def broadcast_data (sock, message):
+def broadcast_data (sock, message, CONNECTION_LIST):
 	#Do not send the message to master socket and the client who has send us the message
 	for socket in CONNECTION_LIST:
 		if socket != server_socket and socket != sock :
@@ -86,10 +86,10 @@ if __name__ == "__main__":
 
 	# List to keep track of socket descriptors
 	CONNECTION_LIST = [] # jugadores
-	COLOR_LIST = ["red","green","yellow","blue"]
+	COLOR_LIST = ["green","red","yellow","blue"]
 	RECV_BUFFER = 4096 # Advisable to keep it as an exponent of 2
 	PORT = 5000
-	turno = 1 # turnos de los jugadores
+	# turno = 1 # turnos de los jugadores
 
 	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	server_socket.bind(("0.0.0.0", PORT))
@@ -107,9 +107,9 @@ if __name__ == "__main__":
 	f.close()
 
 	while True:
-		turno %= 5 # que no se pase de 4
-		if (turno == 0):
-			turno += 1 # no se puede tomar el socket del servidor
+		# turno %= 5 # que no se pase de 4
+		# if (turno == 0):
+		# 	turno += 1 # no se puede tomar el socket del servidor
 
 		#print "Turno : " + str(turno)
 
@@ -131,7 +131,7 @@ if __name__ == "__main__":
 				username = verifyUser(sockfd, users_list, CONNECTION_LIST, sock, COLOR_LIST, users_colors)
 				save_user(users_colors)
 
-				#broadcast_data(sockfd, username)
+				#broadcast_data(sockfd, username, CONNECTION_LIST)
 				sendData(sockfd,CONNECTION_LIST)
 
 			#Some incoming message from a client
@@ -141,17 +141,19 @@ if __name__ == "__main__":
 					#In Windows, sometimes when a TCP program closes abruptly,
 					# a "Connection reset by peer" exception will be thrown
 					data = sock.recv(RECV_BUFFER)
-					if data:
-						print "Datos enviados al servidor : " + data
+					if (data):
+						print ("Datos enviados al servidor : " + data)
 						user = getUsername(sock, users_list)
-						print "Usuario que lo envio : " + user
-						idx = getIndex(user,users_list,CONNECTION_LIST)
-						print "Indice : " + str(idx)
-						print "Turno aca : " + str(turno)
-						if (idx == turno): # si el usuario que envio el dato es el que debe jugar:
-							broadcast_data(sock, "\r" + '<' + str(user) + '> ' + data)
-							print "Se envio el mensaje"
-							turno += 1
+						print ("Usuario que lo envio : " + user)
+						# idx = getIndex(user,users_list,CONNECTION_LIST)
+						# print "Indice : " + str(idx)
+						# print "Turno aca : " + str(turno)
+						# if (idx == turno): # si el usuario que envio el dato es el que debe jugar:
+						# 	broadcast_data(sock, "\r" + '<' + str(user) + '> ' + data)
+						# 	print "Se envio el mensaje"
+						# 	turno += 1
+
+						broadcast_data(sock, data, CONNECTION_LIST)
 
 						# si no, se ignora
 

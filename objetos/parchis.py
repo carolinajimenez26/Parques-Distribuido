@@ -723,7 +723,10 @@ def validaganador(lista):
 
 def agregarJugador(lista_jugadores, nuevoJugador):
 	print ("Jugador entrante: ", nuevoJugador)
-	lista_jugadores.append(Jugador(nuevoJugador[0],nuevoJugador[1]))
+	jugador = Jugador(nuevoJugador[0],nuevoJugador[1])
+	lista_jugadores.append(jugador)
+	jugador.turno = False
+	return jugador
 
 def esperarJugadores(lista_jugadores, socket):
 	data = socket.recv(4096)
@@ -731,15 +734,15 @@ def esperarJugadores(lista_jugadores, socket):
 
 	for element in data:
 		data_element = element.split(":") # usuario:color
-		print ("data_element", data_element)
+		# print ("data_element", data_element)
 		if (data_element == [""]):
 			continue
 
 		colors_not_available = []
-		print ("Colores no disponibles: ", colors_not_available)
+		# print ("Colores no disponibles: ", colors_not_available)
 
 		for player in lista_jugadores:
-			print ("jugador_color: ", player.color)
+			# print ("jugador_color: ", player.color)
 			colors_not_available.append(player.color)
 
 		if (data_element[1] not in colors_not_available):
@@ -789,8 +792,8 @@ def main():
 			sys.exit()
 		if (data == "Bienvenido"):
 			data_user = data_user.split(":")
-			agregarJugador(lista_jugadores, data_user)
-			lista_jugadores[0].turno = True
+			miJugador = agregarJugador(lista_jugadores, data_user)
+			lista_jugadores[0].turno = False
 			cerrar = True
 		if (data == "Nombre de usuario ya ha sido utilizado\n"):
 			error_usuario = "Nombre de usuario ya ha sido utilizado"
@@ -832,6 +835,9 @@ def main():
 	flag = True
 	jugando = False
 
+	print ("Juega de primero : ", lista_jugadores[0])
+	lista_jugadores[0].turno = True
+
 	while cerrar is not False:
 		if(iniciarJuego):
 			print("Entro a iniciarjuego")
@@ -845,12 +851,33 @@ def main():
 			jugando = True
 
 		for event in pygame.event.get():
-			if event.type==QUIT:
-				cerrar=False
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				mx,my = pygame.mouse.get_pos()
+			print ("evento : ", event)
 
+			if event.type == QUIT:
+				sys.exit()
+
+			else:
 				if (jugando):
+
+					mxmy = "" # contiene la posicion en la que otro cliente hizo click
+					mx = ""
+					my = ""
+
+					if (miJugador.turno):
+						print ("Es mi turno")
+						if event.type == pygame.MOUSEBUTTONDOWN:
+							print ("Click!")
+							mx,my = pygame.mouse.get_pos()
+							s.send(str(mx) + "," + str(my))
+
+						if (mx == "" and my == ""):
+							continue
+							# Debemos esperar a que realice una acion
+					else:
+						print ("No es mi turno")
+						mxmy = s.recv(4096)
+						mxmy = mxmy.split(",")
+						mx,my = int(mxmy[0]), int(mxmy[1])
 
 					if(logijuego.puedejugar=="Null"):
 						print("no se han tirado los datos por primera vez")

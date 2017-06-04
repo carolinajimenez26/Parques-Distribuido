@@ -1,0 +1,10 @@
+a:red
+a:red
+b:green
+a:red
+c:blue
+b:green
+a:red
+c:blue
+b:green
+d:yellow
