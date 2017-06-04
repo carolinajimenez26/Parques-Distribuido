@@ -722,11 +722,8 @@ def validaganador(lista):
 	return False
 
 def agregarJugador(lista_jugadores, nuevoJugador):
-	print ("Jugador entrante: ", nuevoJugador)
-	jugador = Jugador(nuevoJugador[0],nuevoJugador[1])
-	lista_jugadores.append(jugador)
-	jugador.turno = False
-	return jugador
+	#print ("Jugador entrante: ", nuevoJugador)
+	lista_jugadores.append(Jugador(nuevoJugador[0],nuevoJugador[1]))
 
 def esperarJugadores(lista_jugadores, socket):
 	data = socket.recv(4096)
@@ -734,15 +731,15 @@ def esperarJugadores(lista_jugadores, socket):
 
 	for element in data:
 		data_element = element.split(":") # usuario:color
-		print ("data_element", data_element)
-		if (len(data_element) < 2):
+		#print ("data_element", data_element)
+		if (data_element == [""]):
 			continue
 
 		colors_not_available = []
-		print ("Colores no disponibles: ", colors_not_available)
+		#print ("Colores no disponibles: ", colors_not_available)
 
 		for player in lista_jugadores:
-			# print ("jugador_color: ", player.color)
+			#print ("jugador_color: ", player.color)
 			colors_not_available.append(player.color)
 
 		if (data_element[1] not in colors_not_available):
@@ -756,16 +753,29 @@ def mostrarJugadores(lista_jugadores, PANTALLA, cursor):
 		display_box(PANTALLA, "%s -> %s" %(jug.color, jug.nombre), cursor, xj, yj)
 	return
 
-def orderUsers(players,order):
-	new_l = []
-	for i in range (0, len(order)):
-		for player in players:
-			if (player.color == order[i]):
-				new_l.append(player)
-				players.remove(player)
-				i += 1
+def organizarTurnos(lista_jugadores,socket):
+	turnos = []
+	orden = []
+	print("RECIBIENDO TURNOS")
+	
+	data = socket.recv(4096)
+	data = data.split("\n")
+	print("Turno %s" %(data) )
 
-	return new_l
+	for element in data:
+		data_element = element.split(":") # usuario:color
+		if (not(data_element[0] in turnos) and data_element[0] != ''):
+			print("Turno guardado %s" %(data_element[0]))
+			turnos.append(data_element[0])
+
+	print("Lista turnos: %s" %(turnos))
+
+	for i in range(4):
+		for j in lista_jugadores:
+			if j.nombre == turnos[i]:
+				orden.append(j)
+				break
+	return orden
 
 def main():
 
@@ -803,8 +813,8 @@ def main():
 			sys.exit()
 		if (data == "Bienvenido"):
 			data_user = data_user.split(":")
-			miJugador = agregarJugador(lista_jugadores, data_user)
-			lista_jugadores[0].turno = False
+			agregarJugador(lista_jugadores, data_user)
+			lista_jugadores[0].turno = True
 			cerrar = True
 		if (data == "Nombre de usuario ya ha sido utilizado\n"):
 			error_usuario = "Nombre de usuario ya ha sido utilizado"
@@ -843,75 +853,40 @@ def main():
 	contador=0
 	cerrar = True
 	iniciarJuego= False
-	jugando = False
 	flag = True
+	jugando = False
+	turnos = []
 
 	while cerrar is not False:
 
-		if (len(lista_jugadores) == 4 and flag):
-
+		if(len(lista_jugadores) == 4 and flag):
 			s.send("Necesito el orden de los turnos")
-			order = s.recv(4096)
-			order = order.split(",")
-			print ("Orden recibido : ", order)
-
-			print ("Orden viejo de juego : ")
-
-			for player in lista_jugadores:
-				print (player.color)
-
-			lista_jugadores = orderUsers(lista_jugadores,order) # ordena los jugadores segun la lista recibida
-
-			print ("Orden nuevo de juego : ")
-
-			for player in lista_jugadores:
-				print (player.color)
-
-			iniciarJuego = True
+			order = organizarTurnos(lista_jugadores, s)
+			lista_jugadores = order
+			for j in lista_jugadores:
+				print("%s: %s" %(j.nombre, j.color))
 			flag = False
+			iniciarJuego = True
+
 
 		if(iniciarJuego):
-			print("Entro a iniciarjuego")
+			#print("Entro a iniciarjuego")
 			cargarfichasjugadores(cantidad,lista_jugadores)
 			table.ponerjugadores(lista_jugadores)
 			logijuego=logicadejuego(lista_jugadores)
 			dadosjuego=dados()
-			for i in lista_jugadores:
-				print("Jugador: %s, fichas: %s" %(i.nombre, str(len(i.lista_fichas))))
+			#for i in lista_jugadores:
+				#print("Jugador: %s, fichas: %s" %(i.nombre, str(len(i.lista_fichas))))
 			iniciarJuego = False
 			jugando = True
 
 		for event in pygame.event.get():
-			print ("evento : ", event)
+			if event.type==QUIT:
+				cerrar=False
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				mx,my = pygame.mouse.get_pos()
 
-			if event.type == QUIT:
-				sys.exit()
-
-			else:
 				if (jugando):
-
-					mxmy = "" # contiene la posicion en la que otro cliente hizo click
-					mx = ""
-					my = ""
-
-					if (miJugador.turno):
-						print ("Es mi turno")
-						if event.type == pygame.MOUSEBUTTONDOWN:
-							print ("Click!")
-							mx,my = pygame.mouse.get_pos()
-							s.send(str(mx) + "," + str(my))
-
-						if (mx == "" and my == ""):
-							continue
-							# Debemos esperar a que realice una acion
-					else:
-						print ("No es mi turno")
-						mxmy = s.recv(4096)
-						mxmy = mxmy.split(",")
-						if (mxmy == [""] or len(mxmy[0]) > 1):
-							continue
-						else:
-							mx,my = int(mxmy[0]), int(mxmy[1])
 
 					if(logijuego.puedejugar=="Null"):
 						print("no se han tirado los datos por primera vez")
