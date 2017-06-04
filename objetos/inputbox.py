@@ -115,7 +115,7 @@ def ask(screen, question, cursor, usr_err, color_err):
 
 
   #screen = pygame.display.set_mode([800, 600])
-  return string.join(current_string,"") + " " + current_color
+  return string.join(current_string,"") + ":" + current_color
 
 def main_inputBox(cursor, screen, usr_err, color_err):
   screen = pygame.display.set_mode((500,280))

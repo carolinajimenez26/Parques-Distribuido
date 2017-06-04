@@ -722,15 +722,28 @@ def validaganador(lista):
 	return False
 
 def agregarJugador(lista_jugadores, nuevoJugador):
-	nuevojug = nuevoJugador.split()
-	lista_jugadores.append(Jugador(nuevojug[0],nuevojug[1]))
-	return
+	print ("Jugador entrante: ", nuevoJugador)
+	lista_jugadores.append(Jugador(nuevoJugador[0],nuevoJugador[1]))
 
-def esperarJugadores(lista_jugadores, s):
-	data = s.recv(4096) #s es el socket
-	print "Jugador entrante %s" %data
-	agregarJugador(lista_jugadores, data)
-	return
+def esperarJugadores(lista_jugadores, socket):
+	data = socket.recv(4096)
+	data = data.split("\n")
+
+	for element in data:
+		data_element = element.split(":") # usuario:color
+		print ("data_element", data_element)
+		if (data_element == [""]):
+			continue
+
+		colors_not_available = []
+		print ("Colores no disponibles: ", colors_not_available)
+
+		for player in lista_jugadores:
+			print ("jugador_color: ", player.color)
+			colors_not_available.append(player.color)
+
+		if (data_element[1] not in colors_not_available):
+			agregarJugador(lista_jugadores, data_element)
 
 def mostrarJugadores(lista_jugadores, PANTALLA, cursor):
 	xj = 630; yj = 130
@@ -764,6 +777,7 @@ def main():
 
 	error_usuario = ""
 	error_color = ""
+	lista_jugadores = [] #lista donde van a ir todos los jugadores
 
 	while not cerrar:
 		data_user = main_inputBox(cursor, PANTALLA, error_usuario, error_color)
@@ -774,6 +788,9 @@ def main():
 			s.close()
 			sys.exit()
 		if (data == "Bienvenido"):
+			data_user = data_user.split(":")
+			agregarJugador(lista_jugadores, data_user)
+			lista_jugadores[0].turno = True
 			cerrar = True
 		if (data == "Nombre de usuario ya ha sido utilizado\n"):
 			error_usuario = "Nombre de usuario ya ha sido utilizado"
@@ -784,22 +801,12 @@ def main():
 		else:
 			error_color = ""
 
-	#print data_user
-
-	#variable que contiene el usuario propio
-	usuario_cliente = data_user.split()[0]
-
-	print usuario_cliente
 
 	PANTALLA = pygame.display.set_mode([800, 600])
-	cantidad=4 #cantidad de fichas
+	cantidad = 4 #cantidad de fichas
 	table=tablero() #tablero
 	table.pulir()
 	table.dibujarmapa()
-	lista_jugadores=[] #lista donde van a ir todos los jugadores
-
-	agregarJugador(lista_jugadores, data_user)
-	lista_jugadores[0].turno = True
 
 	marco_1=pygame.image.load("marco_1.png")
 	marco_1=Imagen(marco_1,(600/3)+(int(600/3)*0.05),int(((600)/3)+((600/3)*0.25)),int((600/3)*0.9),int((600/3)*0.5))
@@ -843,48 +850,50 @@ def main():
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				mx,my = pygame.mouse.get_pos()
 
-				if(logijuego.puedejugar=="Null"):
-					print("no se an tirado los datos por primera vez")
-				elif (jugando):
-					if (logijuego.puedejugar.carcelon()==True and clickdado(mx,my)=="dado"):
-						contador+=1
+				if (jugando):
+
+					if(logijuego.puedejugar=="Null"):
+						print("no se han tirado los datos por primera vez")
+					else:
+						if (logijuego.puedejugar.carcelon()==True and clickdado(mx,my)=="dado"):
+							contador+=1
+							for i in range(1,10):
+								dado_1.animacion(PANTALLA)
+								dado_2.animacion(PANTALLA)
+								pygame.display.flip()
+								time.sleep(0.05)
+							dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+
+					if(contador>=3):
+						logijuego.pasarturnoo()
+						contador=0
+
+					if(playdados==True and  clickdado(mx,my)=="dado"):
 						for i in range(1,10):
 							dado_1.animacion(PANTALLA)
 							dado_2.animacion(PANTALLA)
 							pygame.display.flip()
 							time.sleep(0.05)
 						dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
-
-				if(contador>=3):
-					logijuego.pasarturnoo()
-					contador=0
-
-				if(playdados==True and  clickdado(mx,my)=="dado"):
-					for i in range(1,10):
-						dado_1.animacion(PANTALLA)
-						dado_2.animacion(PANTALLA)
-						pygame.display.flip()
-						time.sleep(0.05)
-					dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
-					playdados=False
-				else:
-					print("TIRAR DADOS POR FAVOR")
-
-				if(playdados==False):
-					logijuego.jugar(lista_jugadores,click(mx,my),dadosjuego,table)
-
-				if(logijuego.turno==False and playdados==False):
-					table.dibujarmapa()
-					table.ponerjugadores(lista_jugadores)
-					if(dado_1.valor!=dado_2.valor):
-						logijuego.pasarturnoo()
+						playdados=False
 					else:
-						logijuego.pasarturnoorepetir()
-					playdados=True
-					contador=0
+						print("TIRAR DADOS POR FAVOR")
 
-			if(validaganador(lista_jugadores)):
-				pass
+					if(playdados==False):
+						logijuego.jugar(lista_jugadores,click(mx,my),dadosjuego,table)
+
+					if(logijuego.turno==False and playdados==False):
+						table.dibujarmapa()
+						table.ponerjugadores(lista_jugadores)
+						if(dado_1.valor!=dado_2.valor):
+							logijuego.pasarturnoo()
+						else:
+							logijuego.pasarturnoorepetir()
+						playdados=True
+						contador=0
+
+				if(validaganador(lista_jugadores)):
+					pass
 
 		mostrarJugadores(lista_jugadores, PANTALLA, cursor)
 		marco_1.dibujar(PANTALLA)

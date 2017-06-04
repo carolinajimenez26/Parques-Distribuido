@@ -14,6 +14,24 @@ def broadcast_data (sock, message):
 				socket.close()
 				CONNECTION_LIST.remove(socket)
 
+
+def sendData(sock, CONNECTION_LIST):
+	print ("sendData")
+	f = open("users.txt",'r')
+	data = f.read()
+	print("data: ", data)
+	f.close()
+	if (len(data) == 0):
+		return
+	for socket in CONNECTION_LIST:
+		if socket != server_socket:
+			try :
+				socket.send(data)
+			except :
+				socket.close()
+				CONNECTION_LIST.remove(socket)
+	print ("fin sendData")
+
 def getUsername(sock, dic):
 	for u,s in dic.items():
 		if s == sock:
@@ -25,7 +43,7 @@ def getUsername(sock, dic):
 def verifyUser(new_client, dic, CONNECTION_LIST, sock,COLOR_LIST, users_colors):
 	while True:
 		#new_client.send("Ingresa un nombre de usuario: ")
-		user = new_client.recv(1024).split()
+		user = new_client.recv(1024).split(":")
 		print "User: %s" %user
 		if (len(user) == 0): # error
 			continue
@@ -41,7 +59,7 @@ def verifyUser(new_client, dic, CONNECTION_LIST, sock,COLOR_LIST, users_colors):
 			users_colors[user[0]] = user[1]
 			new_client.send("Bienvenido")
 			break
-	return string.join(user," ")
+	return string.join(user,"")
 
 # Encuentra el socket segun un nombre de usuario
 def getSocket(username, dic):
@@ -56,6 +74,13 @@ def getIndex(username, dic, CONNECTION_LIST):
 	s = getSocket(username, dic)
 	return CONNECTION_LIST.index(s)
 
+
+def save_user(data):
+	f = open("users.txt",'a')
+	for user,color in data.iteritems():
+		f.write(user + ":" + color + "\n")
+
+	f.close()
 
 if __name__ == "__main__":
 
@@ -91,16 +116,20 @@ if __name__ == "__main__":
 		for sock in read_sockets: # sockets entrantes
 			# Nueva conexion
 			if sock == server_socket:
+				print ("Nueva conexion")
 				# Handle the case in which there is a new connection recieved through server_socket
 				sockfd, addr = server_socket.accept()
 				# se admiten hasta 4 jugadores maximo
-				if(len(CONNECTION_LIST)>4):
+				if(len(CONNECTION_LIST) > 4):
 					sockfd.send("Parques lleno, intentalo mas tarde")
 					break
 
+				# nuevo usuario
 				username = verifyUser(sockfd, users_list, CONNECTION_LIST, sock, COLOR_LIST, users_colors)
+				save_user(users_colors)
 
-				broadcast_data(sockfd, username)
+				#broadcast_data(sockfd, username)
+				sendData(sockfd,CONNECTION_LIST)
 
 			#Some incoming message from a client
 			else:
