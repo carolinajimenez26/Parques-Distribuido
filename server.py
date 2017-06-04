@@ -103,6 +103,9 @@ if __name__ == "__main__":
 	users_list = {}
 	users_colors = {}
 
+	f = open("users.txt",'w')
+	f.close()
+
 	while True:
 		turno %= 5 # que no se pase de 4
 		if (turno == 0):
