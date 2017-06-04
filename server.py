@@ -89,7 +89,6 @@ if __name__ == "__main__":
 	COLOR_LIST = ["green","red","yellow","blue"]
 	RECV_BUFFER = 4096 # Advisable to keep it as an exponent of 2
 	PORT = 5000
-	# turno = 1 # turnos de los jugadores
 
 	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	server_socket.bind(("0.0.0.0", PORT))
@@ -107,11 +106,6 @@ if __name__ == "__main__":
 	f.close()
 
 	while True:
-		# turno %= 5 # que no se pase de 4
-		# if (turno == 0):
-		# 	turno += 1 # no se puede tomar el socket del servidor
-
-		#print "Turno : " + str(turno)
 
 		# Get the list sockets which are ready to be read through select
 		read_sockets,write_sockets,error_sockets = select.select(CONNECTION_LIST,[],[])
@@ -141,24 +135,22 @@ if __name__ == "__main__":
 					#In Windows, sometimes when a TCP program closes abruptly,
 					# a "Connection reset by peer" exception will be thrown
 					data = sock.recv(RECV_BUFFER)
-					if (data):
-						print ("Datos enviados al servidor : " + data)
-						user = getUsername(sock, users_list)
-						print ("Usuario que lo envio : " + user)
-						# idx = getIndex(user,users_list,CONNECTION_LIST)
-						# print "Indice : " + str(idx)
-						# print "Turno aca : " + str(turno)
-						# if (idx == turno): # si el usuario que envio el dato es el que debe jugar:
-						# 	broadcast_data(sock, "\r" + '<' + str(user) + '> ' + data)
-						# 	print "Se envio el mensaje"
-						# 	turno += 1
 
+					print ("Datos enviados al servidor : " + data)
+					user = getUsername(sock, users_list)
+					print ("Usuario que lo envio : " + user)
+
+					if (data == "Necesito el orden de los turnos"):
+						sock.send("green,red,yellow,blue")
+
+					elif (data == ""):
+						continue
+
+					else :
 						broadcast_data(sock, data, CONNECTION_LIST)
 
-						# si no, se ignora
-
 				except:
-					broadcast_data(sock, "Client %s is out\n" %username)
+					broadcast_data(sock, "Client %s is out\n" %username, CONNECTION_LIST)
 					print "Client (%s, %s) is offline" % addr
 					CONNECTION_LIST.remove(sock)
 					sock.close()

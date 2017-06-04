@@ -734,12 +734,12 @@ def esperarJugadores(lista_jugadores, socket):
 
 	for element in data:
 		data_element = element.split(":") # usuario:color
-		# print ("data_element", data_element)
-		if (data_element == [""]):
+		print ("data_element", data_element)
+		if (len(data_element) < 2):
 			continue
 
 		colors_not_available = []
-		# print ("Colores no disponibles: ", colors_not_available)
+		print ("Colores no disponibles: ", colors_not_available)
 
 		for player in lista_jugadores:
 			# print ("jugador_color: ", player.color)
@@ -755,6 +755,17 @@ def mostrarJugadores(lista_jugadores, PANTALLA, cursor):
 		yj += 40
 		display_box(PANTALLA, "%s -> %s" %(jug.color, jug.nombre), cursor, xj, yj)
 	return
+
+def orderUsers(players,order):
+	new_l = []
+	for i in range (0, len(order)):
+		for player in players:
+			if (player.color == order[i]):
+				new_l.append(player)
+				players.remove(player)
+				i += 1
+
+	return new_l
 
 def main():
 
@@ -832,13 +843,33 @@ def main():
 	contador=0
 	cerrar = True
 	iniciarJuego= False
-	flag = True
 	jugando = False
-
-	print ("Juega de primero : ", lista_jugadores[0])
-	lista_jugadores[0].turno = True
+	flag = True
 
 	while cerrar is not False:
+
+		if (len(lista_jugadores) == 4 and flag):
+
+			s.send("Necesito el orden de los turnos")
+			order = s.recv(4096)
+			order = order.split(",")
+			print ("Orden recibido : ", order)
+
+			print ("Orden viejo de juego : ")
+
+			for player in lista_jugadores:
+				print (player.color)
+
+			lista_jugadores = orderUsers(lista_jugadores,order) # ordena los jugadores segun la lista recibida
+
+			print ("Orden nuevo de juego : ")
+
+			for player in lista_jugadores:
+				print (player.color)
+
+			iniciarJuego = True
+			flag = False
+
 		if(iniciarJuego):
 			print("Entro a iniciarjuego")
 			cargarfichasjugadores(cantidad,lista_jugadores)
@@ -877,7 +908,10 @@ def main():
 						print ("No es mi turno")
 						mxmy = s.recv(4096)
 						mxmy = mxmy.split(",")
-						mx,my = int(mxmy[0]), int(mxmy[1])
+						if (mxmy == [""] or len(mxmy[0]) > 1):
+							continue
+						else:
+							mx,my = int(mxmy[0]), int(mxmy[1])
 
 					if(logijuego.puedejugar=="Null"):
 						print("no se han tirado los datos por primera vez")
@@ -930,11 +964,8 @@ def main():
 		boton_empezar.accion(PANTALLA, cursor)
 		pygame.display.update()
 
-		if(len(lista_jugadores)<cantidad):
+		if(len(lista_jugadores) < 4):
 			esperarJugadores(lista_jugadores, s)
-		elif not(iniciarJuego) and flag:
-			iniciarJuego = True
-			flag = False
 
 
 
