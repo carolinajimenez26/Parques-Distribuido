@@ -49,6 +49,7 @@ class Dados(pygame.sprite.Sprite):
 			cont = random.randrange(1, 7)
 		else:
 			cont = num
+		print ("----------------------CONT----------------------: %d" %cont)
 		self.valor=cont
 		self.imagen=pygame.image.load(str(cont)+".JPG")
 		self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
@@ -757,7 +758,6 @@ def mostrarJugadores(lista_jugadores, PANTALLA, cursor):
 	for jug in lista_jugadores:
 		yj += 40
 		display_box(PANTALLA, "%s -> %s" %(jug.color, jug.nombre), cursor, xj, yj)
-	return
 
 def organizarTurnos(lista_jugadores,socket):
 	turnos = []
@@ -782,6 +782,15 @@ def organizarTurnos(lista_jugadores,socket):
 				orden.append(j)
 				break
 	return orden
+
+def mostrarTurno(lista_jugadores, PANTALLA, cursor):
+	turno = ""
+	for j in lista_jugadores:
+		if (j.turno):
+			turno = j.nombre
+			break
+	display_box(PANTALLA, "Turno:\n %s" %turno, cursor, 666, (40*5)+130)
+
 
 def main():
 
@@ -845,13 +854,6 @@ def main():
 	dado_1=Dados(dado_1,(600/3)+(int(600/3)*0.25),int(((600)/3)+((600/3)*0.4)),int((600/3)*0.2),int((600/3)*0.2))
 	dado_2=pygame.image.load("2.JPG")
 	dado_2=Dados(dado_2,(600/3)+(int(600/3)*0.5),int((600)/3)+((600/3)*0.4),int((600/3)*0.2),int((600/3)*0.2))
-
-	empezar1 = pygame.image.load("botones/empezar1.jpg")
-	empezar1 = pygame.transform.scale(empezar1, (100,50))
-	empezar2 = pygame.image.load("botones/empezar2.jpg")
-	empezar2 = pygame.transform.scale(empezar2, (100,50))
-
-	boton_empezar = Boton(empezar1, empezar2, 650, 500)
 
 	playdados=True
 	carce=False
@@ -984,11 +986,11 @@ def main():
 				pass
 
 		mostrarJugadores(lista_jugadores, PANTALLA, cursor)
+		mostrarTurno(lista_jugadores, PANTALLA, cursor)
 		marco_1.dibujar(PANTALLA)
 		dado_1.dibujar(PANTALLA)
 		dado_2.dibujar(PANTALLA)
 		marco_2.dibujar(PANTALLA)
-		boton_empezar.accion(PANTALLA, cursor)
 		pygame.display.update()
 
 		if(len(lista_jugadores) < 4):
