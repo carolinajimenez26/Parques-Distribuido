@@ -6,14 +6,17 @@ import time
 #Function to broadcast chat messages to all connected clients
 def broadcast_data (sock, message, CONNECTION_LIST):
 	#Do not send the message to master socket and the client who has send us the message
+	print ("tamano conn ", len(CONNECTION_LIST))
 	for socket in CONNECTION_LIST:
 		if socket != server_socket and socket != sock :
 			try :
 				socket.send(message)
+				print ("se envioo")
 			except :
 				# broken socket connection may be, chat client pressed ctrl+c for example
 				socket.close()
 				CONNECTION_LIST.remove(socket)
+				print ("no se envio :O")
 
 
 def sendData(CONNECTION_LIST):
@@ -148,6 +151,7 @@ if __name__ == "__main__":
 						continue
 
 					else:
+						print ("Se envia a todos los demas!!")
 						broadcast_data(sock, data, CONNECTION_LIST)
 
 				except:

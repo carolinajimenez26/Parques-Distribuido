@@ -910,7 +910,7 @@ def main():
 					mxmy = mxmy.split(",")
 					print ("Posicion del cursor del que esta jugando: ", mxmy)
 					print ("tamano : ", len(mxmy[0]))
-					if (mxmy == [""] or len(mxmy[0]) > 3):
+					if (mxmy == [""] or len(mxmy[0]) > 3 or len(mxmy[1]) > 3 or len(mxmy) > 2):
 						continue
 					else:
 						mx,my = int(mxmy[0]), int(mxmy[1])
