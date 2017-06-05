@@ -94,7 +94,7 @@ if __name__ == "__main__":
 	PORT = 5000
 
 	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	server_socket.bind(("0.0.0.0", PORT))
+	server_socket.bind(("192.168.9.233", PORT))
 	server_socket.listen(10)
 
 	# Add server socket to the list of readable connections
@@ -149,6 +149,10 @@ if __name__ == "__main__":
 
 					elif (data == ""):
 						continue
+
+					elif (data.split(":")[0] == "Dados"):
+						broadcast_data(sock, data, CONNECTION_LIST) #envia los valores de los dados
+						print ("Se envian dados: %s" %data)
 
 					else:
 						print ("Se envia a todos los demas!!")

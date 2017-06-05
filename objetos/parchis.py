@@ -44,8 +44,11 @@ class Dados(pygame.sprite.Sprite):
 	def dibujar(self,pantalla):
 		pantalla.blit(self.imagen,self.rect)
 
-	def animacion(self,pantalla):
-		cont= random.randrange(1, 7)
+	def animacion(self,pantalla, num, aleatorio):
+		if (aleatorio):
+			cont = random.randrange(1, 7)
+		else:
+			cont = num
 		self.valor=cont
 		self.imagen=pygame.image.load(str(cont)+".JPG")
 		self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
@@ -783,7 +786,7 @@ def organizarTurnos(lista_jugadores,socket):
 def main():
 
 	#-----------------------conexion con el servidor-------------------------
-	host = "localhost"
+	host = "192.168.9.233"
 	port = 5000
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -921,11 +924,22 @@ def main():
 					if (logijuego.puedejugar.carcelon()==True and clickdado(mx,my)=="dado"):
 						contador+=1
 						for i in range(1,10):
-							dado_1.animacion(PANTALLA)
-							dado_2.animacion(PANTALLA)
+							dado_1.animacion(PANTALLA, 0, True)
+							dado_2.animacion(PANTALLA, 0, True)
 							pygame.display.flip()
 							time.sleep(0.05)
-						dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+						if (miJugador.turno):
+							dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+							data = "Dados:%s:%s" %(str(dado_1.valor), (dado_2.valor))
+							s.send(data)
+							print ("Es mi turno, envio dados: %s" %data)
+						else:
+							dadosValor = s.recv(4096)
+							dadosValor = dadosValor.split(":")
+							dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
+							print ("No es mi turno, recibo dados: %s" %dadosValor)
+							dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
+							dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
 
 				if(contador>=3):
 					logijuego.pasarturnoo()
@@ -933,11 +947,22 @@ def main():
 
 				if(playdados==True and  clickdado(mx,my)=="dado"):
 					for i in range(1,10):
-						dado_1.animacion(PANTALLA)
-						dado_2.animacion(PANTALLA)
+						dado_1.animacion(PANTALLA, 0, True)
+						dado_2.animacion(PANTALLA, 0, True)
 						pygame.display.flip()
 						time.sleep(0.05)
-					dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+					if (miJugador.turno):
+						dadosjuego.reiniciar(dado_1.valor,dado_2.valor)
+						data = "Dados:%s:%s" %(str(dado_1.valor), (dado_2.valor))
+						s.send(data)
+						print ("Es mi turno, envio dados: %s" %data)
+					else:
+						dadosValor = s.recv(4096)
+						dadosValor = dadosValor.split(":")
+						dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
+						print ("No es mi turno, recibo dados: %s" %dadosValor)
+						dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
+						dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
 					playdados=False
 				else:
 					print("TIRAR DADOS POR FAVOR")
