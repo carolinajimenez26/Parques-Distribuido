@@ -28,6 +28,7 @@ class Imagen(pygame.sprite.Sprite):
 
 	def dibujar(self,pantalla):
 		pantalla.blit(self.imagen,self.rect)
+		pygame.display.update()
 
 
 
@@ -43,6 +44,7 @@ class Dados(pygame.sprite.Sprite):
 
 	def dibujar(self,pantalla):
 		pantalla.blit(self.imagen,self.rect)
+		pygame.display.update()
 
 	def animacion(self,pantalla, num, aleatorio):
 		if (aleatorio):
@@ -54,6 +56,7 @@ class Dados(pygame.sprite.Sprite):
 		self.imagen=pygame.image.load(str(cont)+".JPG")
 		self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
 		pantalla.blit(self.imagen,self.rect)
+		pygame.display.update()
 		return(cont)
 ##################################################################################
 
@@ -347,6 +350,7 @@ class tablero(object):
 		fondo=pygame.image.load("fondo.jpg")
 		fondo=pygame.transform.scale(fondo,(600,600))
 		PANTALLA.blit(fondo,(0,0))
+		pygame.display.update()
 		pygame.display.flip()
 
 	def ponerjugadores(self,judadore):
@@ -368,21 +372,26 @@ class tablero(object):
 				if(y.pos=="carcel"):
 					if(x.color=="green"):
 						PANTALLA.blit(verde,(60*contador,60*contadory))
+						pygame.display.update()
 
 					if(x.color=="red"):
 						PANTALLA.blit(rojo,(400+contador*60,60*contadory))
+						pygame.display.update()
 
 					if(x.color=="blue"):
 						PANTALLA.blit(azul,(400+contador*60,400+60*contadory))
+						pygame.display.update()
 
 					if(x.color=="yellow"):
 						PANTALLA.blit(amarillo,(contador*60,400+60*contadory))
+						pygame.display.update()
 
 					if(contador==2 and contadory != 2):
 						contadory=2
 						contador=0
 					pygame.display.flip()
 					contador+=1
+					pygame.display.update()
 				else:
 					#DESDE ACA________________________________________
 
@@ -426,18 +435,22 @@ class tablero(object):
 					if(x.color=="green"):
 
 						PANTALLA.blit(verde,(vector_posiciones(y.pos)[0]+cuadrex,vector_posiciones(y.pos)[1]+cuadrey))
+						pygame.display.update()
 
 					if(x.color=="red"):
 
 
 						PANTALLA.blit(rojo,(vector_posiciones(y.pos)[0]+cuadrex,vector_posiciones(y.pos)[1]+cuadrey))
+						pygame.display.update()
 
 					if(x.color=="blue"):
 
 						PANTALLA.blit(azul,(vector_posiciones(y.pos)[0]+cuadrex,vector_posiciones(y.pos)[1]+cuadrey))
+						pygame.display.update()
 
 					if(x.color=="yellow"):
 						PANTALLA.blit(amarillo,(vector_posiciones(y.pos)[0]+cuadrex,vector_posiciones(y.pos)[1]+cuadrey))
+						pygame.display.update()
 
 					pygame.display.flip()
 					#HASTA ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -795,8 +808,8 @@ def mostrarTurno(lista_jugadores, PANTALLA, cursor):
 def main():
 
 	#-----------------------conexion con el servidor-------------------------
-	host = "192.168.9.233"
-	port = 5000
+	host = "192.168.8.154"
+	port = 5001
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 	try :
@@ -938,10 +951,11 @@ def main():
 						else:
 							dadosValor = s.recv(4096)
 							dadosValor = dadosValor.split(":")
-							dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
-							print ("No es mi turno, recibo dados: %s" %dadosValor)
-							dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
-							dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
+							if (dadosValor[0] == "Dados"):
+								dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
+								print ("No es mi turno, recibo dados: %s" %dadosValor)
+								dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
+								dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
 
 				if(contador>=3):
 					logijuego.pasarturnoo()
@@ -961,10 +975,11 @@ def main():
 					else:
 						dadosValor = s.recv(4096)
 						dadosValor = dadosValor.split(":")
-						dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
-						print ("No es mi turno, recibo dados: %s" %dadosValor)
-						dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
-						dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
+						if (dadosValor[0] == "Dados"):
+							dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
+							print ("No es mi turno, recibo dados: %s" %dadosValor)
+							dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
+							dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
 					playdados=False
 				else:
 					print("TIRAR DADOS POR FAVOR")
