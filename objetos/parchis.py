@@ -67,10 +67,15 @@ class Tile(object):
 		self.ocupantes.append(ob)
 
 	def comer(self,colordominante):
+		if (self.seguro==False):
 			for x in self.ocupantes:
 				if(x.color!=colordominante):
 					x.pos="carcel"
 
+	def comerobligado(self,colordominante):
+		for x in self.ocupantes:
+			if(x.color!=colordominante):
+				x.pos="carcel"
 
 	def sacar(self,colordominante):
 			contador=0
@@ -444,18 +449,22 @@ class tablero(object):
 		pass
 
 	def pulir(self):
+		self.Tiles[5].seguro=True
 		self.Tiles[5].salida=True
 		self.Tiles[5].color="yellow"
 		self.Tiles[12].seguro=True
 		
+		self.Tiles[22].seguro=True
 		self.Tiles[22].salida=True
 		self.Tiles[22].color="blue"
 		self.Tiles[29].seguro=True
 
+		self.Tiles[39].seguro=True
 		self.Tiles[39].salida=True
 		self.Tiles[39].color="red"
 		self.Tiles[46].seguro=True
 
+		self.Tiles[56].seguro=True
 		self.Tiles[56].salida=True
 		self.Tiles[56].color="green"
 		self.Tiles[63].seguro=True		
@@ -538,15 +547,8 @@ class  logicadejuego(object):
 				return
 
 	def pasarturnoorepetir(self):
-		contador=0
-		for x in self.listapersonajes:
-			if(x.turno==True):
-				if(contador+1>=len(self.listapersonajes)):
-					cont = 0
-				self.listapersonajes[contador].turno=True
-				self.turno=True
-				return
-			contador+=1
+		self.turno=True
+
 
 	def estalaficha(self,lista,color):
 		for x in lista:
@@ -654,22 +656,22 @@ class  logicadejuego(object):
 							#######COMER AL SALIR DE LA CARCEL
 							if(self.puedejugar.color=="red" and x.color=="red"):
 								y.pos=39
-								mapa.Tiles[39].comer("red")
+								mapa.Tiles[39].comerobligado("red")
 								mapa.Tiles[39].anexarocupante(y)
 
 							if(self.puedejugar.color=="blue" and x.color=="blue"):
 								y.pos=22
-								mapa.Tiles[22].comer("blue")
+								mapa.Tiles[22].comerobligado("blue")
 								mapa.Tiles[22].anexarocupante(y)
 
 							if(self.puedejugar.color=="green" and x.color=="green"):
 								y.pos=56
-								mapa.Tiles[56].comer("green")
+								mapa.Tiles[56].comerobligado("green")
 								mapa.Tiles[56].anexarocupante(y)
 
 							if(self.puedejugar.color=="yellow"  and x.color=="yellow"):
 								y.pos=5
-								mapa.Tiles[5].comer("yellow")
+								mapa.Tiles[5].comerobligado("yellow")
 								mapa.Tiles[5].anexarocupante(y)
 				self.turno=False
 				return
