@@ -1,0 +1,10 @@
+german:red
+german:red
+oscar:yellow
+german:red
+oscar:yellow
+carlaa:green
+german:red
+oscar:yellow
+carlaa:green
+juan:blue

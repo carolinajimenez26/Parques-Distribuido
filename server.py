@@ -1,25 +1,29 @@
 import socket, select
 import string
+import time
 
 
 #Function to broadcast chat messages to all connected clients
-def broadcast_data (sock, message):
+def broadcast_data (sock, message, CONNECTION_LIST):
 	#Do not send the message to master socket and the client who has send us the message
+	print ("tamano conn ", len(CONNECTION_LIST))
 	for socket in CONNECTION_LIST:
 		if socket != server_socket and socket != sock :
 			try :
 				socket.send(message)
+				print ("se envioo")
 			except :
 				# broken socket connection may be, chat client pressed ctrl+c for example
 				socket.close()
 				CONNECTION_LIST.remove(socket)
+				print ("no se envio :O")
 
 
-def sendData(sock, CONNECTION_LIST):
-	print ("sendData")
+def sendData(CONNECTION_LIST):
+	#print ("sendData")
 	f = open("users.txt",'r')
 	data = f.read()
-	print("data: ", data)
+	#print("data: ", data)
 	f.close()
 	if (len(data) == 0):
 		return
@@ -36,15 +40,14 @@ def getUsername(sock, dic):
 	for u,s in dic.items():
 		if s == sock:
 			return u
-	print "usuario no encontrado"
+	print ("usuario no encontrado")
 	return None
-
 
 def verifyUser(new_client, dic, CONNECTION_LIST, sock,COLOR_LIST, users_colors):
 	while True:
 		#new_client.send("Ingresa un nombre de usuario: ")
 		user = new_client.recv(1024).split(":")
-		print "User: %s" %user
+		print ("User: %s" %user)
 		if (len(user) == 0): # error
 			continue
 		if (user[1] not in COLOR_LIST):
@@ -66,7 +69,7 @@ def getSocket(username, dic):
 	for u,s in dic.items():
 		if u == username:
 			return s
-	print "Socket no encontrado"
+	print ("Socket no encontrado")
 	return None
 
 # Retorna el indice de un nombre de usuario
@@ -89,10 +92,9 @@ if __name__ == "__main__":
 	COLOR_LIST = ["red","green","yellow","blue"]
 	RECV_BUFFER = 4096 # Advisable to keep it as an exponent of 2
 	PORT = 5000
-	turno = 1 # turnos de los jugadores
 
 	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	server_socket.bind(("0.0.0.0", PORT))
+	server_socket.bind(("192.168.9.233", PORT))
 	server_socket.listen(10)
 
 	# Add server socket to the list of readable connections
@@ -105,13 +107,9 @@ if __name__ == "__main__":
 
 	f = open("users.txt",'w')
 	f.close()
+	turnosEnviados = False
 
 	while True:
-		turno %= 5 # que no se pase de 4
-		if (turno == 0):
-			turno += 1 # no se puede tomar el socket del servidor
-
-		#print "Turno : " + str(turno)
 
 		# Get the list sockets which are ready to be read through select
 		read_sockets,write_sockets,error_sockets = select.select(CONNECTION_LIST,[],[])
@@ -132,7 +130,7 @@ if __name__ == "__main__":
 				save_user(users_colors)
 
 				#broadcast_data(sockfd, username)
-				sendData(sockfd,CONNECTION_LIST)
+				sendData(CONNECTION_LIST)
 
 			#Some incoming message from a client
 			else:
@@ -141,23 +139,28 @@ if __name__ == "__main__":
 					#In Windows, sometimes when a TCP program closes abruptly,
 					# a "Connection reset by peer" exception will be thrown
 					data = sock.recv(RECV_BUFFER)
-					if data:
-						print "Datos enviados al servidor : " + data
-						user = getUsername(sock, users_list)
-						print "Usuario que lo envio : " + user
-						idx = getIndex(user,users_list,CONNECTION_LIST)
-						print "Indice : " + str(idx)
-						print "Turno aca : " + str(turno)
-						if (idx == turno): # si el usuario que envio el dato es el que debe jugar:
-							broadcast_data(sock, "\r" + '<' + str(user) + '> ' + data)
-							print "Se envio el mensaje"
-							turno += 1
+					print ("Datos enviados al servidor : " + data)
+					user = getUsername(sock, users_list)
+					print ("Usuario que lo envio : " + user)
+					# idx = getIndex(user,users_list,CONNECTION_LIST)
 
-						# si no, se ignora
+					if (data == "Necesito el orden de los turnos" and len(users_list)==4):
+						sendData(CONNECTION_LIST)
+
+					elif (data == ""):
+						continue
+
+					elif (data.split(":")[0] == "Dados"):
+						broadcast_data(sock, data, CONNECTION_LIST) #envia los valores de los dados
+						print ("Se envian dados: %s" %data)
+
+					else:
+						print ("Se envia a todos los demas!!")
+						broadcast_data(sock, data, CONNECTION_LIST)
 
 				except:
-					broadcast_data(sock, "Client %s is out\n" %username)
-					print "Client (%s, %s) is offline" % addr
+					broadcast_data(sock, "Client %s is out\n" %username, CONNECTION_LIST)
+					print ("Client (%s, %s) is offline" % addr)
 					CONNECTION_LIST.remove(sock)
 					sock.close()
 					continue
