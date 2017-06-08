@@ -51,7 +51,6 @@ class Dados(pygame.sprite.Sprite):
 			cont = random.randrange(1, 7)
 		else:
 			cont = num
-		print ("----------------------CONT----------------------: %d" %cont)
 		self.valor=cont
 		self.imagen=pygame.image.load(str(cont)+".JPG")
 		self.imagen= pygame.transform.scale(self.imagen, (self.ancho,self.alto))
@@ -75,9 +74,15 @@ class Tile(object):
 		self.ocupantes.append(ob)
 
 	def comer(self,colordominante):
+		if (self.seguro == False):
 			for x in self.ocupantes:
 				if(x.color!=colordominante):
 					x.pos="carcel"
+
+	def comerobligado(self,colordominante):
+		for x in self.ocupantes:
+			if(x.color!=colordominante):
+				x.pos="carcel"
 
 
 	def sacar(self,colordominante):
@@ -238,6 +243,7 @@ def click(mx,my):
 
 
 def clickdado(mx,my):
+	print ("clickdado")
 	#Cordenadas de priciones
 	mx1=mx
 	my1=my
@@ -245,6 +251,7 @@ def clickdado(mx,my):
 	my=int(my/200)
 
 	if(mx==1 and my==1):
+		print ("entra a clickdado")
 		return "dado"
 
 
@@ -462,18 +469,22 @@ class tablero(object):
 		pass
 
 	def pulir(self):
+		self.Tiles[5].seguro=True
 		self.Tiles[5].salida=True
 		self.Tiles[5].color="yellow"
 		self.Tiles[12].seguro=True
 
+		self.Tiles[22].seguro=True
 		self.Tiles[22].salida=True
 		self.Tiles[22].color="blue"
 		self.Tiles[29].seguro=True
 
+		self.Tiles[39].seguro=True
 		self.Tiles[39].salida=True
 		self.Tiles[39].color="red"
 		self.Tiles[46].seguro=True
 
+		self.Tiles[56].seguro=True
 		self.Tiles[56].salida=True
 		self.Tiles[56].color="green"
 		self.Tiles[63].seguro=True
@@ -541,29 +552,20 @@ class  logicadejuego(object):
 			return False
 
 	def pasarturnoo(self):
-		contador=0
 		for x in self.listapersonajes:
-			if(x.turno==True):
-				x.turno=False
-				if(contador+1>=len(self.listapersonajes)):
-					self.listapersonajes[0].turno=True
-				else:
-					self.listapersonajes[contador+1].turno=True
-				self.turno=True
+			if(x.turno == True):
+				x.turno = False
+				idx = self.listapersonajes.index(x)
+				idx += 1
+				if (idx > 3):
+					idx = 0
+				self.listapersonajes[idx].turno = True
+				self.turno = True
 				return
-			contador+=1
 
 	def pasarturnoorepetir(self):
-		contador=0
-		for x in self.listapersonajes:
-			if(x.turno==True):
-				if(contador+1>=len(self.listapersonajes)):
-					self.listapersonajes[0].turno=True
-				else:
-					self.listapersonajes[contador].turno=True
-				self.turno=True
-				return
-			contador+=1
+		self.turno=True
+
 
 	def estalaficha(self,lista,color):
 		for x in lista:
@@ -671,22 +673,22 @@ class  logicadejuego(object):
 							#######COMER AL SALIR DE LA CARCEL
 							if(self.puedejugar.color=="red" and x.color=="red"):
 								y.pos=39
-								mapa.Tiles[39].comer("red")
+								mapa.Tiles[39].comerobligado("red")
 								mapa.Tiles[39].anexarocupante(y)
 
 							if(self.puedejugar.color=="blue" and x.color=="blue"):
 								y.pos=22
-								mapa.Tiles[22].comer("blue")
+								mapa.Tiles[22].comerobligado("blue")
 								mapa.Tiles[22].anexarocupante(y)
 
 							if(self.puedejugar.color=="green" and x.color=="green"):
 								y.pos=56
-								mapa.Tiles[56].comer("green")
+								mapa.Tiles[56].comerobligado("green")
 								mapa.Tiles[56].anexarocupante(y)
 
 							if(self.puedejugar.color=="yellow"  and x.color=="yellow"):
 								y.pos=5
-								mapa.Tiles[5].comer("yellow")
+								mapa.Tiles[5].comerobligado("yellow")
 								mapa.Tiles[5].anexarocupante(y)
 				self.turno=False
 				return
@@ -802,14 +804,14 @@ def mostrarTurno(lista_jugadores, PANTALLA, cursor):
 		if (j.turno):
 			turno = j.nombre
 			break
-	display_box(PANTALLA, "Turno:\n %s" %turno, cursor, 666, (40*5)+130)
+	display_box(PANTALLA, "Turno: %s" %turno, cursor, 666, (40*5)+130)
 
 
 def main():
 
 	#-----------------------conexion con el servidor-------------------------
-	host = "192.168.8.154"
-	port = 5001
+	host = "192.168.8.94"
+	port = 5000
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 	try :
@@ -916,6 +918,8 @@ def main():
 					if event.type == pygame.MOUSEBUTTONDOWN:
 						print ("Click!")
 						mx,my = pygame.mouse.get_pos()
+						print ("mx : ", mx)
+						print ("my : ", my)
 						s.send(str(mx) + "," + str(my))
 
 					if (mx == "" and my == ""):
@@ -952,10 +956,13 @@ def main():
 							dadosValor = s.recv(4096)
 							dadosValor = dadosValor.split(":")
 							if (dadosValor[0] == "Dados"):
-								dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
 								print ("No es mi turno, recibo dados: %s" %dadosValor)
-								dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
-								dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
+								if (len(dadosValor[1]) > 3 or len(dadosValor[2]) > 3):
+									pass
+								else:
+									dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
+									dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
+									dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
 
 				if(contador>=3):
 					logijuego.pasarturnoo()
@@ -976,10 +983,13 @@ def main():
 						dadosValor = s.recv(4096)
 						dadosValor = dadosValor.split(":")
 						if (dadosValor[0] == "Dados"):
-							dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
 							print ("No es mi turno, recibo dados: %s" %dadosValor)
-							dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
-							dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
+							if (len(dadosValor[1]) > 3 or len(dadosValor[2]) > 3):
+								pass
+							else:
+								dadosjuego.reiniciar( int(dadosValor[1]), int(dadosValor[2]) )
+								dado_1.animacion(PANTALLA, int(dadosValor[1]), False)
+								dado_2.animacion(PANTALLA, int(dadosValor[2]), False)
 					playdados=False
 				else:
 					print("TIRAR DADOS POR FAVOR")

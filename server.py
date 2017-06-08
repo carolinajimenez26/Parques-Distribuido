@@ -94,7 +94,7 @@ if __name__ == "__main__":
 	PORT = 5000
 
 	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	server_socket.bind(("192.168.9.233", PORT))
+	server_socket.bind(("192.168.8.94", PORT))
 	server_socket.listen(10)
 
 	# Add server socket to the list of readable connections
@@ -110,6 +110,7 @@ if __name__ == "__main__":
 	turnosEnviados = False
 
 	while True:
+		data = ""
 
 		# Get the list sockets which are ready to be read through select
 		read_sockets,write_sockets,error_sockets = select.select(CONNECTION_LIST,[],[])
@@ -139,7 +140,7 @@ if __name__ == "__main__":
 					#In Windows, sometimes when a TCP program closes abruptly,
 					# a "Connection reset by peer" exception will be thrown
 					data = sock.recv(RECV_BUFFER)
-					print ("Datos enviados al servidor : " + data)
+					print ("Datos recibidos por el servidor : " + data)
 					user = getUsername(sock, users_list)
 					print ("Usuario que lo envio : " + user)
 					# idx = getIndex(user,users_list,CONNECTION_LIST)
