@@ -1,5 +1,12 @@
 # telnet program example
 import socket, select, string, sys
+import pygame
+import sys
+from pygame.locals import *
+
+sys.path.append('./objetos/')
+
+from objects import *
  
 def prompt(username) :
     sys.stdout.write(username+": ")
@@ -7,6 +14,22 @@ def prompt(username) :
  
 #main function
 if __name__ == "__main__":
+
+    ANCHO=600
+    ALTO=600
+    ANCHO_PANTALLA=800
+
+    pygame.init()
+    PANTALLA = pygame.display.set_mode([ANCHO_PANTALLA,ALTO])
+
+    jugar1 = pygame.image.load("objetos/botones/1.png")
+    jugar2 = pygame.image.load("objetos/botones/1.1.png")
+    boton1 = Boton(jugar1,jugar2,100,100)
+
+    fondo = pygame.image.load("objetos/game.png")
+    
+    cursor= Cursor()
+
      
     host = "localhost"
     port = 5000
@@ -41,6 +64,8 @@ if __name__ == "__main__":
         prompt(username)
      
     while Correcto:
+        PANTALLA.blit(fondo,(0,0))
+        #print ("while")
         socket_list = [sys.stdin, s]
          
         # Get the list sockets which are readable
@@ -59,7 +84,22 @@ if __name__ == "__main__":
                     prompt(username)
              
             #user entered a message
-            else :
-                msg = sys.stdin.readline()
-                s.send(msg)
-                prompt(username)
+            #else :
+                #msg = sys.stdin.readline()
+                #s.send(msg)
+                #prompt(username)
+
+            event = pygame.event.poll()
+            #print ("evento")
+            
+            if event.type == QUIT:
+                pass
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if cursor.colliderect(boton1.rect):
+                    s.send("presiono %s" %username)
+                    print ("presionooo", username)
+                    
+            cursor.posicion()
+            PANTALLA.blit(fondo,(0,0))
+            boton1.accion(PANTALLA,cursor)
+            pygame.display.flip()

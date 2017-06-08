@@ -1,123 +1,169 @@
 import socket, select
+import string
+import time
+
 
 #Function to broadcast chat messages to all connected clients
-def broadcast_data (sock, message):
-    #Do not send the message to master socket and the client who has send us the message
-    for socket in CONNECTION_LIST:
-        if socket != server_socket and socket != sock :
-            try :
-                socket.send(message)
-            except :
-                # broken socket connection may be, chat client pressed ctrl+c for example
-                socket.close()
-                CONNECTION_LIST.remove(socket)
+def broadcast_data (sock, message, CONNECTION_LIST):
+	#Do not send the message to master socket and the client who has send us the message
+	print ("tamano conn ", len(CONNECTION_LIST))
+	for socket in CONNECTION_LIST:
+		if socket != server_socket and socket != sock :
+			try :
+				socket.send(message)
+				print ("se envioo")
+			except :
+				# broken socket connection may be, chat client pressed ctrl+c for example
+				socket.close()
+				CONNECTION_LIST.remove(socket)
+				print ("no se envio :O")
+
+
+def sendData(CONNECTION_LIST):
+	#print ("sendData")
+	f = open("users.txt",'r')
+	data = f.read()
+	#print("data: ", data)
+	f.close()
+	if (len(data) == 0):
+		return
+	for socket in CONNECTION_LIST:
+		if socket != server_socket:
+			try :
+				socket.send(data)
+			except :
+				socket.close()
+				CONNECTION_LIST.remove(socket)
+	print ("fin sendData")
 
 def getUsername(sock, dic):
-    for u,s in dic.items():
-        if s == sock:
-            return u
-    print "usuario no encontrado"
-    return None
+	for u,s in dic.items():
+		if s == sock:
+			return u
+	print ("usuario no encontrado")
+	return None
 
+def verifyUser(new_client, dic, CONNECTION_LIST, sock,COLOR_LIST, users_colors):
+	while True:
+		#new_client.send("Ingresa un nombre de usuario: ")
+		user = new_client.recv(1024).split(":")
+		print ("User: %s" %user)
+		if (len(user) == 0): # error
+			continue
+		if (user[1] not in COLOR_LIST):
+			new_client.send("Color ya ha sido utilizado\n")
+		elif (user[0] in dic):
+			new_client.send("Nombre de usuario ya ha sido utilizado\n")
 
-def verifyUser(new_client, dic, CONNECTION_LIST, sock):
-    while True:
-        new_client.send("Ingresa un nombre de usuario: ")
-        user = new_client.recv(1024)
-        print "User: %s" %user
-
-        if (user in dic):
-            new_client.send("Nombre de usuario ya ha sido utilizado\n")
-        else:
-            CONNECTION_LIST.append(new_client)
-            dic[user] = new_client
-            new_client.send("Bienvenido al chat")
-            break
-    return user
+		else:
+			COLOR_LIST.remove(user[1])
+			CONNECTION_LIST.append(new_client)
+			dic[user[0]] = new_client
+			users_colors[user[0]] = user[1]
+			new_client.send("Bienvenido")
+			break
+	return string.join(user,"")
 
 # Encuentra el socket segun un nombre de usuario
 def getSocket(username, dic):
-    for u,s in dic.items():
-        if u == username:
-            return s
-    print "Socket no encontrado"
-    return None
+	for u,s in dic.items():
+		if u == username:
+			return s
+	print ("Socket no encontrado")
+	return None
 
 # Retorna el indice de un nombre de usuario
 def getIndex(username, dic, CONNECTION_LIST):
-    s = getSocket(username, dic)
-    return CONNECTION_LIST.index(s)
+	s = getSocket(username, dic)
+	return CONNECTION_LIST.index(s)
 
+
+def save_user(data):
+	f = open("users.txt",'a')
+	for user,color in data.iteritems():
+		f.write(user + ":" + color + "\n")
+
+	f.close()
 
 if __name__ == "__main__":
 
-    # List to keep track of socket descriptors
-    CONNECTION_LIST = [] # jugadores
-    RECV_BUFFER = 4096 # Advisable to keep it as an exponent of 2
-    PORT = 5000
-    turno = 1 # turnos de los jugadores
+	# List to keep track of socket descriptors
+	CONNECTION_LIST = [] # jugadores
+	COLOR_LIST = ["red","green","yellow","blue"]
+	RECV_BUFFER = 4096 # Advisable to keep it as an exponent of 2
+	PORT = 5000
 
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(("0.0.0.0", PORT))
-    server_socket.listen(10)
+	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	server_socket.bind(("192.168.8.94", PORT))
+	server_socket.listen(10)
 
-    # Add server socket to the list of readable connections
-    CONNECTION_LIST.append(server_socket) # no se tiene en cuenta esta primera posicion en los jugadores
+	# Add server socket to the list of readable connections
+	CONNECTION_LIST.append(server_socket) # no se tiene en cuenta esta primera posicion en los jugadores
 
-    print "Chat server started on port " + str(PORT)
+	print ("Chat server started on port " + str(PORT))
 
-    users_list = {}
+	users_list = {}
+	users_colors = {}
 
-    while True:
-        turno %= 5 # que no se pase de 4
-        if (turno == 0):
-            turno += 1 # no se puede tomar el socket del servidor
+	f = open("users.txt",'w')
+	f.close()
+	turnosEnviados = False
 
-        print "Turno : " + str(turno)
+	while True:
+		data = ""
 
-        # Get the list sockets which are ready to be read through select
-        read_sockets,write_sockets,error_sockets = select.select(CONNECTION_LIST,[],[])
+		# Get the list sockets which are ready to be read through select
+		read_sockets,write_sockets,error_sockets = select.select(CONNECTION_LIST,[],[])
 
-        for sock in read_sockets: # sockets entrantes
-            # Nueva conexion
-            if sock == server_socket:
-                # Handle the case in which there is a new connection recieved through server_socket
-                sockfd, addr = server_socket.accept()
-                # se admiten hasta 4 jugadores maximo
-                if(len(CONNECTION_LIST)>4):
-                    sockfd.send("Parques lleno, intentalo mas tarde")
-                    break
+		for sock in read_sockets: # sockets entrantes
+			# Nueva conexion
+			if sock == server_socket:
+				print ("Nueva conexion")
+				# Handle the case in which there is a new connection recieved through server_socket
+				sockfd, addr = server_socket.accept()
+				# se admiten hasta 4 jugadores maximo
+				if(len(CONNECTION_LIST) > 4):
+					sockfd.send("Parques lleno, intentalo mas tarde")
+					break
 
-                username = verifyUser(sockfd, users_list, CONNECTION_LIST, sock)
+				# nuevo usuario
+				username = verifyUser(sockfd, users_list, CONNECTION_LIST, sock, COLOR_LIST, users_colors)
+				save_user(users_colors)
 
-                broadcast_data(sockfd, username + " entered room\n")
+				#broadcast_data(sockfd, username)
+				sendData(CONNECTION_LIST)
 
-            #Some incoming message from a client
-            else:
-                # Data recieved from client, process it
-                try:
-                    #In Windows, sometimes when a TCP program closes abruptly,
-                    # a "Connection reset by peer" exception will be thrown
-                    data = sock.recv(RECV_BUFFER)
-                    if data:
-                        print "Datos enviados al servidor : " + data
-                        user = getUsername(sock, users_list)
-                        print "Usuario que lo envio : " + user
-                        idx = getIndex(user,users_list,CONNECTION_LIST)
-                        print "Indice : " + str(idx)
-                        print "Turno aca : " + str(turno)
-                        if (idx == turno): # si el usuario que envio el dato es el que debe jugar:
-                            broadcast_data(sock, "\r" + '<' + str(user) + '> ' + data)
-                            print "Se envio el mensaje"
-                            turno += 1
+			#Some incoming message from a client
+			else:
+				# Data recieved from client, process it
+				try:
+					#In Windows, sometimes when a TCP program closes abruptly,
+					# a "Connection reset by peer" exception will be thrown
+					data = sock.recv(RECV_BUFFER)
+					print ("Datos recibidos por el servidor : " + data)
+					user = getUsername(sock, users_list)
+					print ("Usuario que lo envio : " + user)
+					# idx = getIndex(user,users_list,CONNECTION_LIST)
 
-                        # si no, se ignora
+					if (data == "Necesito el orden de los turnos" and len(users_list)==4):
+						sendData(CONNECTION_LIST)
 
-                except:
-                    broadcast_data(sock, "Client %s is out\n" %username)
-                    print "Client (%s, %s) is offline" % addr
-                    sock.close()
-                    CONNECTION_LIST.remove(sock)
-                    continue
+					elif (data == ""):
+						continue
 
-    server_socket.close()
+					elif (data.split(":")[0] == "Dados"):
+						broadcast_data(sock, data, CONNECTION_LIST) #envia los valores de los dados
+						print ("Se envian dados: %s" %data)
+
+					else:
+						print ("Se envia a todos los demas!!")
+						broadcast_data(sock, data, CONNECTION_LIST)
+
+				except:
+					broadcast_data(sock, "Client %s is out\n" %username, CONNECTION_LIST)
+					print ("Client (%s, %s) is offline" % addr)
+					CONNECTION_LIST.remove(sock)
+					sock.close()
+					continue
+
+	server_socket.close()
